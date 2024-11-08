@@ -1,13 +1,19 @@
+input_text:
+  immich_api_key:
+    name: Immich API Key
+    initial: !secret immichapikey
+    max: 64
+
 shell_command:
   random_immich_photo_json: >
-    curl -s -H "x-api-key: {{ secrets.immichapikey }}" 
+    curl -s -H "x-api-key: {{ states('input_text.immich_api_key') }}" 
     "http://homeassistant.local:8181/api/assets/random?count=1"
 
 command_line:
   - sensor:
       name: random_immich_photo_json
       command: >
-        curl -s -H "x-api-key: {{ secrets.immichapikey }}" "http://homeassistant.local:8181/api/assets/random?count=1"
+        curl -s -H "x-api-key: {{ states('input_text.immich_api_key') }}" "http://homeassistant.local:8181/api/assets/random?count=1"
       value_template: >
         {% set json = value | from_json %}
         {% if json | length > 0 %}
