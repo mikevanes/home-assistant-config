@@ -1,0 +1,144 @@
+footer:
+  template:
+    - settings
+    - tilt
+    - extra_styles
+  variables:
+    tilt_options: >
+      [[[
+        return {
+          max: 5,
+          scale: 1.1,
+          glare: true,
+          'max-glare': 0.07,
+          perspective: 1000,
+          speed: 800,
+          parallax: '10px'
+        };
+      ]]]
+  size: 2vw
+  show_icon: false
+  color: "#9da0a2"
+  custom_fields:
+    error: >
+      [[[
+        if (Number.isInteger(variables.error)) {
+            return variables.error;
+        } else if (variables.error) {
+            return `<span style="font-weight: 900;">!</span>`;
+        }
+      ]]]
+    alert: >
+      [[[
+        if (Number.isInteger(variables.alert)) {
+            return variables.alert;
+        } else if (variables.alert) {
+            return `<span style="font-weight: 900;">!</span>`;
+        }
+      ]]]
+    warning: >
+      [[[
+        if (Number.isInteger(variables.warning)) {
+            return variables.warning;
+        } else if (variables.warning) {
+            return `<span style="font-weight: 900;">!</span>`;
+        }
+      ]]]
+  styles:
+    card:
+      - color: "#97989c"
+      - width: fit-content
+      - border: 0.12vw solid rgba(115, 115, 115, 0.2)
+      - transition: none
+      - padding: 0 0 0.05vw 0
+      - overflow: visible
+      - --mdc-ripple-color: rgba(0, 0, 0, 0.8)
+    custom_fields:
+      error:
+        - display: >
+            [[[
+              if (Number.isInteger(variables.error)) {
+                  return variables.error > 0
+                      ? 'initial'
+                      : 'none';
+              }
+              else if (variables.error) {
+                  return variables.error
+                      ? 'initial'
+                      : 'none';
+              }
+            ]]]
+        - position: absolute
+        - font-weight: 700
+        - color: "#d6d6d6"
+        - background: "#FF0000"
+        - border-radius: 50%
+        - text-align: center
+        - text-overflow: unset
+        - z-index: 1
+      alert:
+        - display: >
+            [[[
+              if (Number.isInteger(variables.alert)) {
+                  return variables.alert > 0
+                      ? 'initial'
+                      : 'none';
+              }
+              else if (variables.alert) {
+                  return variables.alert
+                      ? 'initial'
+                      : 'none';
+              }
+            ]]]
+        - position: absolute
+        - font-weight: 700
+        - color: "#d6d6d6"
+        - background: "#1E90FF"
+        - border-radius: 50%
+        - text-align: center
+        - text-overflow: unset
+        - z-index: 1
+        - top: >
+            [[[
+              if (Number.isInteger(variables.error) && variables.error > 0) {
+                  return '0.2vw'
+              }
+            ]]]
+      warning:
+        - display: >
+            [[[
+              if (Number.isInteger(variables.warning)) {
+                  return variables.warning > 0
+                      ? 'initial'
+                      : 'none';
+              }
+              else if (variables.warning) {
+                  return variables.warning
+                      ? 'initial'
+                      : 'none';
+              }
+            ]]]
+        - position: absolute
+        - font-weight: 700
+        - color: "#d6d6d6"
+        - background: "#FF8C00"
+        - border-radius: 50%
+        - text-align: center
+        - text-overflow: unset
+        - z-index: 1
+
+        - top: >
+            [[[
+              if (Number.isInteger(variables.error) && variables.error > 0 && Number.isInteger(variables.alert) && variables.alert > 0) {
+                  return '1.1vw'
+              }
+              else if (Number.isInteger(variables.alert) && variables.alert > 0 || Number.isInteger(variables.error) && variables.error > 0) {
+                  return '0.2vw'
+              }
+            ]]]
+  tap_action:
+    haptic: medium
+  hold_action:
+    action: block
+  double_tap_action:
+    action: block

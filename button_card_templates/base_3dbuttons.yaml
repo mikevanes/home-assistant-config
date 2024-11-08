@@ -1,0 +1,38 @@
+base_3dbuttons:
+  style:
+    left: 0.5%
+    top: 54.5%
+  size: 50%
+  icon: mdi:lightbulb
+  show_state: false
+  show_icon: true
+  show_name: false
+  show_label: false
+  tap_action:
+    action: toggle
+  double_tap_action:
+    action: more-info
+  styles:
+    icon:
+      - color: > 
+          [[[ 
+            const rgb = entity.attributes?.rgb_color ? 
+              `rgb(${entity.attributes?.rgb_color[0]},${entity.attributes?.rgb_color[1]},${entity.attributes?.rgb_color[2]})` :
+              "rgb(224, 225, 225)"
+
+            return rgb
+          ]]]
+    card:
+      - width: 3vw
+      - height: 3vw
+      - borderRadius: 50%
+      - left: >
+          [[[
+            return variables.left
+          ]]]
+      - top: >
+          [[[
+            return variables.top
+          ]]]
+      - background-color: >
+          [[[ return (entity.state === 'on' ) ? 'rgba(255, 255, 255, 1.0)' : 'rgba(115, 115, 115, 0.6)'; ]]]

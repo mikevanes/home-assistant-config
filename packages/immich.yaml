@@ -1,0 +1,34 @@
+shell_command:
+  random_immich_photo_json: >
+    curl -s -H "x-api-key: {{ secrets.immichapikey }}" 
+    "http://homeassistant.local:8181/api/assets/random?count=1"
+
+command_line:
+  - sensor:
+      name: random_immich_photo_json
+      command: >
+        curl -s -H "x-api-key: {{ secrets.immichapikey }}" "http://homeassistant.local:8181/api/assets/random?count=1"
+      value_template: >
+        {% set json = value | from_json %}
+        {% if json | length > 0 %}
+          {{"Path: " + json[0].originalPath + ", LOC: " + json[0].exifInfo.country + " - " + json[0].exifInfo.state + " - " + json[0].exifInfo.city}}
+        {% else %}
+          'Onbekend'
+        {% endif %}
+
+automation:
+  - alias: "Fetch Random JPEG Data Every minute"
+    trigger:
+      - platform: time_pattern
+        seconds: "/10"
+    action:
+      - action: shell_command.random_immich_photo_json
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.random_immich_photo_json
+
+homeassistant:
+  customize:
+    sensor.random_immich_photo_json:
+      friendly_name: "Immich json"
+      icon: mdi:image

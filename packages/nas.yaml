@@ -1,0 +1,293 @@
+shell_command:
+  nas_cpu: !secret nascpu
+  nas_ram: !secret nasram
+  nas_container_count: !secret nascontainercount
+  nas_container_stopped: !secret nascontainerstopped
+  nas_container_paused: !secret nascontainerspaused
+  nas_avg_disk_temp: !secret nasavgdisktemp
+  nas_uptime: !secret nasuptime
+  nas_off: !secret nasoff
+
+template:
+  - sensor:
+      - name: "NAS Status"
+        state: >
+          {% if states('sensor.nas_uptime') | length > 0 and states('sensor.nas_uptime') != 'unknown' %}
+            true
+          {% else %}
+            false
+          {% endif %}
+
+command_line:
+  - sensor:
+      name: nas_cpu
+      command: !secret nascpu
+      unit_of_measurement: "%"
+      value_template: >
+        {{ value | float(default=0) | round(1) }}
+
+  - sensor:
+      name: nas_ram
+      command: !secret nasram
+      unit_of_measurement: "%"
+      value_template: >
+        {{ value | float(default=0) | round(1) }}
+
+  - sensor:
+      name: nas_container_count
+      command: !secret nascontainercount
+      value_template: "{{ value | int }}"
+
+  - sensor:
+      name: nas_container_stopped
+      command: !secret nascontainerstopped
+      value_template: "{{ value | int }}"
+
+  - sensor:
+      name: nas_container_paused
+      command: !secret nascontainerspaused
+      value_template: "{{ value | int }}"
+
+  - sensor:
+      name: nas_avg_disk_temp
+      command: !secret nasavgdisktemp
+      value_template: "{{ value | float(default=0) | round(1) }}"
+
+  - sensor:
+      name: nas_uptime
+      command: !secret nasuptime
+      value_template: >
+        {% set uptime = value.replace('up ', '').replace('weeks', 'week').replace('days', 'day').replace('hours', 'hour').replace('minutes', 'minute').replace(',', '') %}
+
+        {# Safely extract each time unit using regex and handle missing values #}
+        {% set weeks = uptime | regex_findall('(\d+) week') %}
+        {% set days = uptime | regex_findall('(\d+) day') %}
+        {% set hours = uptime | regex_findall('(\d+) hour') %}
+        {% set minutes = uptime | regex_findall('(\d+) minute') %}
+
+        {# Convert extracted values to integers, defaulting to 0 if not found #}
+        {% set total_hours = ((weeks[0] | int if weeks else 0) * 7 * 24) +
+                            ((days[0] | int if days else 0) * 24) +
+                            (hours[0] | int if hours else 0) +
+                            ((minutes[0] | int if minutes else 0) / 60) %}
+                            
+        {{ total_hours | round(0) }} uur
+
+automation:
+  - alias: "Turn on NAS 09:00 on weekends."
+    description: ""
+    mode: single
+    triggers:
+      - trigger: time
+        at: "09:30:00"
+    conditions:
+      - condition: time
+        weekday:
+          - sat
+          - sun
+    actions:
+      - action: wake_on_lan.send_magic_packet
+        data:
+          mac: !secret nasmac
+          broadcast_address: !secret nasbroadcast
+
+      - delay: "00:00:10"
+
+      - action: shell_command.nas_cpu
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_cpu
+
+      - action: shell_command.nas_ram
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_ram
+
+      - action: shell_command.nas_container_count
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_count
+
+      - action: shell_command.nas_container_stopped
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_stopped
+
+      - action: shell_command.nas_container_paused
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_paused
+
+      - action: shell_command.nas_avg_disk_temp
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_avg_disk_temp
+
+      - action: shell_command.nas_uptime
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_uptime
+  
+  - alias: "Turn on NAS 16:00 on weekdays."
+    mode: single
+    triggers:
+      - trigger: time
+        at: "16:00:00"
+    conditions:
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+    actions:
+      - action: wake_on_lan.send_magic_packet
+        data:
+          mac: !secret nasmac
+          broadcast_address: !secret nasbroadcast
+
+      - delay: "00:00:10"
+
+      - action: shell_command.nas_cpu
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_cpu
+
+      - action: shell_command.nas_ram
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_ram
+
+      - action: shell_command.nas_container_count
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_count
+
+      - action: shell_command.nas_container_stopped
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_stopped
+
+      - action: shell_command.nas_container_paused
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_paused
+
+      - action: shell_command.nas_avg_disk_temp
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_avg_disk_temp
+
+      - action: shell_command.nas_uptime
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_uptime
+
+  - alias: "Turn off NAS during the night."
+    mode: single
+    triggers:
+      - trigger: time
+        at: "00:10:00"
+    # conditions:
+    #   - condition: not
+    #     conditions:
+    #       - condition: state
+    #         entity_id: media_player.plex_plex_for_windows_desktop_vqi6kc7
+    #         state: "off"
+    #       - condition: state
+    #         entity_id: media_player.plex_plex_web_firefox_windows
+    #         state: "off"
+    actions:
+      - action: shell_command.nas_off
+
+  # - alias: "Turn off NAS during the night. After plex is stopped."
+  #   mode: single
+  #   triggers:
+  #     - trigger: state
+  #       entity_id:
+  #         - media_player.plex_plex_for_windows_desktop_vqi6kc7
+  #       to: "off"
+  #     - trigger: state
+  #       entity_id:
+  #         - media_player.plex_plex_for_windows_desktop_vqi6kc7
+  #       to: idle
+  #     - trigger: state
+  #       entity_id:
+  #         - media_player.plex_plex_web_firefox_windows
+  #       to: "off"
+  #     - trigger: state
+  #       entity_id:
+  #         - media_player.plex_plex_web_firefox_windows
+  #       to: idle
+  #   conditions:
+  #     - condition: time
+  #       after: "00:15:00"
+  #   actions:
+  #     - action: shell_command.nas_off
+
+  - alias: Run NAS Commands Daily at 16:30
+    trigger:
+      - platform: time
+        at: "16:30:00"
+    action:
+      - action: shell_command.nas_cpu
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_cpu
+
+      - action: shell_command.nas_ram
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_ram
+
+      - action: shell_command.nas_container_count
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_count
+
+      - action: shell_command.nas_container_stopped
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_stopped
+
+      - action: shell_command.nas_container_paused
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_container_paused
+
+      - action: shell_command.nas_avg_disk_temp
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_avg_disk_temp
+
+      - action: shell_command.nas_uptime
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.nas_uptime
+
+
+homeassistant:
+  customize:
+    sensor.nas_cpu:
+      friendly_name: NAS Processor
+      icon: mdi:chip
+
+    sensor.nas_ram:
+      friendly_name: NAS Ram
+      icon: mdi:memory
+
+    sensor.nas_container_count:
+      friendly_name: NAS Container count
+
+    sensor.nas_container_stopped:
+      friendly_name: NAS containers stopped
+
+    sensor.nas_container_paused:
+      friendly_name: NAS containers paused
+
+    sensor.nas_avg_disk_temp:
+      friendly_name: NAS avg disk temp
+
+    sensor.nas_uptime:
+      friendly_name: NAS uptime

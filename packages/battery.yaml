@@ -1,0 +1,61 @@
+template:
+  - sensor:
+      - name: "Batterij niveau's (40-100%)"
+        state: >
+          {{ 
+            expand('sensor.batterij_gevoedde_apparaten')
+              | selectattr('attributes.device_class', 'eq', 'battery')
+              | selectattr('state', 'is_number')
+              | map(attribute='state')
+              | map('int', default=0)
+              | select('ge', 40)
+              | select('le', 100)
+              | list
+              | count 
+          }}
+        icon: "mdi:battery-high"
+
+      - name: "Batterij niveau's (20-40%)"
+        state: >
+          {{ 
+            expand('sensor.batterij_gevoedde_apparaten')
+              | selectattr('attributes.device_class', 'eq', 'battery')
+              | selectattr('state', 'is_number')
+              | map(attribute='state')
+              | map('int', default=0)
+              | select('ge', 20)
+              | select('le', 40)
+              | list
+              | count 
+          }}
+        icon: "mdi:battery-medium"
+
+      - name: "Batterij niveau's (10-20%)"
+        state: >
+          {{ 
+            expand('sensor.batterij_gevoedde_apparaten')
+              | selectattr('attributes.device_class', 'eq', 'battery')
+              | selectattr('state', 'is_number')
+              | map(attribute='state')
+              | map('int', default=0)
+              | select('ge', 10)
+              | select('le', 20)
+              | list
+              | count 
+          }}
+        icon: "mdi:battery-low"
+
+      - name: "Batterij niveau's (0-10%)"
+        state: >
+          {{ 
+            expand('sensor.batterij_gevoedde_apparaten')
+              | selectattr('attributes.device_class', 'eq', 'battery')
+              | selectattr('state', 'is_number')
+              | map(attribute='state')
+              | map('int', default=0)
+              | select('ge', 0)
+              | select('le', 10)
+              | list
+              | count 
+          }}
+        icon: "mdi:battery-low"

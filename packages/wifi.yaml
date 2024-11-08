@@ -1,0 +1,13 @@
+template:
+  - sensor:
+      - name: "WiFi SSID"
+        state: !secret wifi_ssid
+
+      - name: "WiFi Password"
+        state: !secret wifi_password
+
+      - name: "WiFi QR Code URL"
+        state: >
+          {% set ssid = states('sensor.wifi_ssid') %}
+          {% set password = states('sensor.wifi_password') %}
+          {{ 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' ~ ('WIFI:T:WPA;S:' ~ ssid ~ ';P:' ~ password ~ ';;') | urlencode }}

@@ -1,0 +1,56 @@
+automation:
+  - alias: "Hal aan, bij bezetting"
+    mode: single
+    triggers:
+      - type: occupied
+        device_id: 2d02a851db74e4ec11ff3ae22e450821
+        entity_id: 5b2d8aa75dc98370228e34e3f24ba0f0
+        domain: binary_sensor
+        trigger: device
+      - type: occupied
+        device_id: e2ef60d6f1f976dfe0c364719b5b79a8
+        entity_id: d5b47dc01767e563447c9dc9186ccd8b
+        domain: binary_sensor
+        trigger: device
+    conditions:
+      - condition: or
+        conditions:
+          - type: is_illuminance
+            condition: device
+            device_id: e2ef60d6f1f976dfe0c364719b5b79a8
+            entity_id: d22554a54b78d98ebdefb3868985c414
+            domain: sensor
+            below: 1200
+          - type: is_illuminance
+            condition: device
+            device_id: 2d02a851db74e4ec11ff3ae22e450821
+            entity_id: bbed1d39984abbf24b5008d8a96e37f0
+            domain: sensor
+            below: 10
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.hal
+
+  - alias: "Hal uit, zonder bezetting"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.motion_hal_occupancy
+          - binary_sensor.motion_kapstok_occupancy
+        to: "off"
+    condition:
+      - condition: state
+        entity_id: light.hal
+        state: "on"
+      - condition: state
+        entity_id: binary_sensor.motion_hal_occupancy
+        state: "off"
+      - condition: state
+        entity_id: binary_sensor.motion_kapstok_occupancy
+        state: "off"
+    actions:
+      - action: light.turn_off
+        target:
+          entity_id: light.hal

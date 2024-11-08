@@ -1,0 +1,53 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: Anna
+    style: >
+      --popup-max-width: 400px;
+    content:
+      type: vertical-stack
+      cards:
+        - type: entities
+          entities:
+            - type: custom:template-entity-row
+              entity: person.anna
+              secondary: >
+                {{ states('sensor.anna_update_info') }} | Batterij: {{ states('sensor.iphone_van_anna_batterij') }}%
+
+        - type: custom:mod-card
+          card_mod:
+            style:
+              hui-horizontal-stack-card$: |
+                #root {
+                  justify-content: space-evenly !important;
+                  padding: var(--tablet-popup-button-padding);
+                }
+          card:
+            type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                name: Zoek iPhone van Anna
+                icon: mdi:volume-high
+                template: icon_name
+                tap_action:
+                  action: call-service
+                  service: icloud.play_sound
+                  service_data:
+                    account: !secret appleaccountemailanna
+                    device_name: iphone van anna
+
+        - type: calendar
+          initial_view: dayGridMonth
+          entities:
+            - calendar.prive
+            - calendar.verjaardagen
+            - calendar.mike_anna
+            - calendar.mela_2
+          theme: tablet
+          card_mod:
+            style:
+              ha-full-calendar$: |
+                .header h1 {
+                  display: none !important;
+                }

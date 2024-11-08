@@ -1,0 +1,8 @@
+wake_tv:
+  alias: Wake TV
+  sequence:
+  - action: wake_on_lan.send_magic_packet
+    metadata: {}
+    data:
+      mac: !secret tvmac
+  description: ''

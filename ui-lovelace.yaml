@@ -1,0 +1,2077 @@
+button_card_templates: !include_dir_merge_named button_card_templates
+
+views:
+  - type: custom:grid-layout
+    title: Home
+    layout:
+      #default
+      margin: 0
+      grid-gap: var(--custom-layout-card-padding)
+      grid-template-columns: 0.33421fr 0.22fr 0.22fr 0.22fr
+      grid-template-rows: 0 repeat(2, fit-content(100%)) 0fr
+      grid-template-areas: |
+        "sidebar  .           .       .       ."
+        "sidebar  Woonkamer  Kantoor  Slaapkamer  ."
+        "sidebar  media       Overig  .   ."
+        "sidebar  footer      footer  footer  ."
+      mediaquery:
+        #phone
+        "(max-width: 800px)":
+          grid-gap: calc(var(--custom-layout-card-padding) * .7)
+          grid-template-columns: 0 repeat(2, 1fr) 0
+          grid-template-rows: 0 repeat(5, fit-content(100%)) 0fr
+          grid-template-areas: |
+            ".  .           .        ."
+            ".  sidebar     sidebar  ."
+            ".  Woonkamer  Slaapkamer   ."
+            ".  Kantoor      Overig   ."
+            ".  media       .    ."
+            ".  footer      footer   ."
+            ".  .           .        ."
+        #portrait
+        "(max-width: 1200px)":
+          grid-gap: var(--custom-layout-card-padding)
+          grid-template-columns: repeat(3, 1fr) 0
+          grid-template-rows: 0 repeat(3, fit-content(100%)) 0fr
+          grid-template-areas: |
+            "sidebar  .           .       ."
+            "sidebar  Woonkamer  Slaapkamer  ."
+            "sidebar  Kantoor      Overig  ."
+            "sidebar  media       .   ."
+            "sidebar  footer      footer  ."
+            "sidebar  .           .       ."
+    cards:
+      #################################################
+      #                                               #
+      #                    SIDEBAR                    #
+      #                                               #
+      #################################################
+
+      - type: vertical-stack
+        view_layout:
+          grid-area: sidebar
+
+        cards:
+          - type: custom:button-card
+            entity: sensor.template_sidebar
+            template: sidebar
+
+          - type: "custom:button-card"
+            name: "Home"
+            icon: mdi:home
+            tap_action:
+              action: navigate
+              navigation_path: "3?kiosk"
+            variables:
+              active: false
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Apparaten"
+            icon: mdi:devices
+            tap_action:
+              action: navigate
+              navigation_path: "0?kiosk"
+            variables:
+              active: true
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Media"
+            icon: mdi:music-circle-outline
+            tap_action:
+              action: navigate
+              navigation_path: "1?kiosk"
+            variables:
+              active: false
+              media: true
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            triggers_update:
+              - media_player.spotify
+              - media_player.spotify_annawilmink
+              - media_player.plex_plex_for_windows_desktop_vqi6kc7
+            template:
+              - base_menu
+              - media_menu
+
+          - type: "custom:button-card"
+            name: "Weer"
+            entity: weather.buienradar
+            tap_action:
+              action: navigate
+              navigation_path: "2?kiosk"
+            variables:
+              sun: sun.sun
+              active: false
+              media: false
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - weather_menu
+
+          - type: custom:mod-card
+            style: |
+              ha-card {
+                margin-top: 2.5em;
+                padding: 0.5em var(--custom-layout-card-padding) 0 var(--custom-layout-card-padding);
+              }
+            card:
+              type: horizontal-stack
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_home.png
+                    tap_action: !include popup/anna.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          transition: none;
+                          width: 70%;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_away.png
+                    tap_action: !include popup/anna.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+                        
+          - type: custom:mini-graph-card
+            hours_to_show: 24
+            points_per_hour: 1
+            # color_thresholds_transition: hard
+            color_thresholds:
+              - value: 450 # Groen 0-450
+                color: "#80C994" 
+              - value: 700 # Oranje 450-700
+                color: "#FCD663" 
+              - value: 1000   # Rood 700-1000
+                color: "#F18B82"
+              - value: 1500 # Grijs 1000-1500
+                color: "#BBBBBB"
+            show:
+              legend: false
+              labels: false
+              labels_secondary: false
+            entities:
+              - entity: sensor.p1_meter_vermogen
+                show_fill: true
+              - entity: sensor.gemiddeld_vebruik_per_dag
+                color: "#205679"
+                show_fill: false 
+            card_mod:
+              style: |
+                ha-card.type-custom-mini-graph-card {
+                  padding: 0px 0px 0px;
+                  margin: 2.3em 0px 0px 0px;
+                  border: none;
+                  border-radius: 0;
+                }
+                ha-card > div {
+                  padding: 0px!important;
+                }
+                .type-custom-mini-graph-card .header {
+                  display: none !important; /* This hides the header text */
+                }
+                .type-custom-mini-graph-card .name {
+                  display: none !important; /* This hides the main name of the graph */
+                }
+                .type-custom-mini-graph-card .icon {
+                  display: none !important; /* This hides the icon if there's one */
+                }
+                .type-custom-mini-graph-card .state {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                  font-weight: 400;
+                  color: rgba(255, 255, 255, 0.8);
+                }
+                .type-custom-mini-graph-card .state .state__value {
+                  font-family: var(--primary-font-family);
+                }
+                .type-custom-mini-graph-card .state .state__uom {
+                  font-family: var(--primary-font-family);
+                  line-height: 1.5em;
+                }
+                .type-custom-mini-graph-card .state__time {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                }
+
+      #################################################
+      #                                               #
+      #                  Woonkamer                   #
+      #                                               #
+      #################################################
+      - type: markdown
+        content: |
+          <span>({{ states('sensor.temp_huiskamer_temperature') }}°C)</span>
+        card_mod:
+          style: |
+            ha-card {
+              border: none;
+              color: #6a7377!important;
+              font-weight: bold;
+              position:absolute;
+              margin-left:162px;
+              top: 21.5px;
+            }
+      - type: grid
+        title: Woonkamer
+        view_layout:
+          grid-area: Woonkamer
+        columns: 2
+        cards:
+          - type: custom:button-card
+            entity: light.tv
+            name: TV lampen
+            template:
+              - light
+              - icon_lamp
+
+          - type: custom:button-card
+            entity: light.plafond_lampen
+            name: Plafond Lampen
+            template:
+              - light
+              - icon_hue
+
+          - type: custom:button-card
+            entity: media_player.tv
+            name: Tv
+            tap_action:
+              action: call-service
+              service: script.toggle_tv_power
+            double_tap_action: !include popup/woonkamer_tv.yaml
+            template:
+              - base
+              - icon_tv
+              - loader
+
+          - type: custom:button-card
+            entity: light.keuken
+            name: Keuken licht
+            template:
+              - light
+              - icon_spot
+
+      #################################################
+      #                                               #
+      #                    Kantoor                    #
+      #                                               #
+      #################################################
+      - type: markdown
+        content: |
+          <span>({{ states('sensor.temp_kantoor_temperature') }}°C)</span>
+        card_mod:
+          style: |
+            ha-card {
+              border: none;
+              color: #6a7377!important;
+              font-weight: bold;
+              position:absolute;
+              margin-left:105px;
+              top: 21.5px;
+            }
+
+      - type: grid
+        title: Kantoor
+        entity: sensor.lumi_temperature
+        view_layout:
+          grid-area: Kantoor
+        columns: 2
+        cards:
+          - type: custom:button-card
+            entity: light.kantoor
+            name: Plafond lamp
+            template:
+              - light
+              - icon_hue
+
+          - type: custom:button-card
+            entity: switch.pc_mike
+            name: Computer
+            double_tap_action: !include popup/pc_mike.yaml
+            template:
+              - base
+              - icon_imac
+              - loader
+              - lock
+            variables:
+              lock: >
+                [[[
+                  let lock = states['input_boolean.pc_mike_lock'];
+                  return !lock || lock.state;
+                ]]]
+
+          - type: custom:button-card
+            entity: media_player.32_odyssey_oled_g8
+            name: Monitor
+            template:
+              - base
+              - icon_tv
+              - loader
+
+      #################################################
+      #                                               #
+      #                    Slaapkamer                 #
+      #                                               #
+      #################################################
+      - type: markdown
+        content: |
+          <span>({{ states('sensor.temp_slaapkamer_temperature') }}°C)</span>
+        card_mod:
+          style: |
+            ha-card {
+              border: none;
+              color: #6a7377!important;
+              font-weight: bold;
+              position:absolute;
+              margin-left:162px;
+              top: 21.5px;
+            }
+              
+      - type: grid
+        title: Slaapkamer
+        view_layout:
+          grid-area: Slaapkamer
+        columns: 2
+        card_mod:
+          style: |
+            :host::after {
+              content: ' - Additional Info';
+              color: var(--primary-color);
+              font-weight: bold;
+            }
+        cards:
+          - type: custom:button-card
+            entity: light.slaapkamer
+            name: Plafond lamp
+            template:
+              - light
+              - icon_hue
+
+          - type: custom:button-card
+            entity: media_player.chromecast_2
+            name: "Pc\u00B2"
+            # double_tap_action: !include popup/slaapkamer_tv.yaml
+            template:
+              - base
+              - icon_tv
+              - loader
+
+      #################################################
+      #                                               #
+      #                     MEDIA                     #
+      #                                               #
+      #################################################
+      - type: grid
+        title: Media
+        view_layout:
+          grid-area: media
+        columns: 1
+        cards:
+          - type: custom:button-card
+            entity: sensor.random_immich_photo_json
+            name: " "
+            template:
+              - immich
+                      
+      #################################################
+      #                                               #
+      #                    Overig                     #
+      #                                               #
+      #################################################
+
+      - type: grid
+        title: Overig
+        view_layout:
+          grid-area: Overig
+        columns: 2
+        cards:
+          - type: custom:button-card
+            entity: light.toilet
+            name: Wc
+            template:
+              - light
+              - icon_bathroom
+
+          - type: custom:button-card
+            entity: light.hal 
+            name: Hal
+            template:
+              - light
+              - icon_closet
+
+          - type: custom:button-card
+            entity: light.badkamer
+            name: Badkamer
+            template:
+              - light
+              - icon_spot
+          
+          - type: custom:button-card
+            entity: light.washok
+            name: Washok
+            template:
+              - light
+              - icon_washingmachine
+
+      #################################################
+      #                                               #
+      #                    FOOTER                     #
+      #                                               #
+      #################################################
+
+      - type: horizontal-stack
+        view_layout:
+          grid-area: footer
+        cards:
+          - type: custom:button-card
+            entity: sensor.nas_container_stopped
+            name: >
+              <ha-icon icon="mdi:nas"></ha-icon> NAS
+            tap_action: !include popup/footer_nas.yaml
+            triggers_update:
+              - sensor.nas_container_stopped
+              - sensor.nas_container_paused
+            variables:
+              alert: >
+                [[[
+                  return parseInt(states['sensor.nas_container_count']?.state) || 0;
+                ]]]
+              warning: >
+                [[[
+                  return parseInt(states['sensor.nas_container_paused']?.state) || 0;
+                ]]]
+              error: >
+                [[[
+                  return parseInt(entity?.state) || 0;
+                ]]]
+            template: footer
+            card_mod:
+              style: |
+                ha-card {
+                  margin-left: 150px!important;
+                }
+
+          - type: custom:button-card
+            entity: sensor.batterij_gevoedde_apparaten
+            name: >
+              <ha-icon icon="mdi:battery"></ha-icon> Batterij
+            tap_action: !include popup/footer_batterij.yaml
+            triggers_update:
+              - sensor.batterij_gevoedde_apparaten
+            variables:
+              alert: >
+                [[[
+                  return parseInt(states['sensor.batterij_niveau_s_20_40']?.state) || 0;
+                ]]]
+              warning: >
+                [[[
+                  return parseInt(states['sensor.batterij_niveau_s_10_20']?.state) || 0;
+                ]]]
+              error: >
+                [[[
+                  return parseInt(states['sensor.batterij_niveau_s_0_10']) || 0;
+                ]]]
+            template: footer
+
+          - type: custom:button-card
+            name: >
+              <ha-icon icon="mdi:router-wireless"></ha-icon> Router
+            tap_action: !include popup/footer_router.yaml
+            template: footer
+
+  #################################################
+  #               MEDIA  SECTIE                   #
+  #################################################
+
+  - type: custom:grid-layout
+    title: Media
+    layout:
+      #default
+      margin: 0
+      grid-gap: var(--custom-layout-card-padding)
+      grid-template-columns: 0.3fr 0.7fr
+      grid-template-rows: repeat(2, fit-content(100%))
+      grid-template-areas: |
+        "sidebar media"
+        "sidebar media"
+      mediaquery:
+        #phone
+        "(max-width: 800px)":
+          grid-gap: calc(var(--custom-layout-card-padding) * 1.7)
+          grid-template-columns: 0 1fr
+          grid-template-rows: repeat(2, fit-content(100%))
+          grid-template-areas: |
+            "sidebar"
+            "media"
+        #portrait
+        "(max-width: 1200px)":
+          grid-gap: var(--custom-layout-card-padding)
+          grid-template-columns: auto 1fr
+          grid-template-rows: repeat(2, fit-content(100%))
+          grid-template-areas: |
+            "sidebar media"
+            "sidebar media"
+
+    cards:
+      #################################################
+      #                    SIDEBAR                    #
+      #################################################
+      - type: vertical-stack
+        view_layout:
+          grid-area: sidebar
+        cards:
+          - type: custom:button-card
+            entity: sensor.template_sidebar
+            template: sidebar
+
+          - type: "custom:button-card"
+            name: "Home"
+            icon: mdi:home
+            tap_action:
+              action: navigate
+              navigation_path: "3?kiosk"
+            variables:
+              active: false
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Apparaten"
+            icon: mdi:devices
+            tap_action:
+              action: navigate
+              navigation_path: "0?kiosk"
+            variables:
+              active: false
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Media"
+            icon: mdi:music-circle-outline
+            tap_action:
+              action: navigate
+              navigation_path: "1?kiosk"
+            variables:
+              active: true
+              media: true
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - media_menu
+
+          - type: "custom:button-card"
+            name: "Weer"
+            entity: weather.buienradar
+            tap_action:
+              action: navigate
+              navigation_path: "2?kiosk"
+            variables:
+              sun: sun.sun
+              active: false
+              media: false
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - weather_menu
+
+          - type: custom:mod-card
+            style: |
+              ha-card {
+                margin-top: 2.5em;
+                padding: 0.5em var(--custom-layout-card-padding) 0 var(--custom-layout-card-padding);
+              }
+            card:
+              type: horizontal-stack
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+          - type: custom:mini-graph-card
+            hours_to_show: 24
+            # color_thresholds_transition: hard
+            color_thresholds:
+              - value: 450 # Groen 0-450
+                color: "#80C994" 
+              - value: 700 # Oranje 450-700
+                color: "#FCD663" 
+              - value: 1000   # Rood 700-1000
+                color: "#F18B82"
+              - value: 1500 # Grijs 1000-1500
+                color: "#BBBBBB"
+            show:
+              legend: false
+              labels: false
+              labels_secondary: false
+            entities:
+              - entity: sensor.p1_meter_vermogen
+                show_fill: true
+              - entity: sensor.gemiddeld_vebruik_per_dag
+                color: "#205679"
+                show_fill: false 
+            card_mod:
+              style: |
+                ha-card.type-custom-mini-graph-card {
+                  padding: 0px 0px 0px;
+                  margin: 2.3em 0px 0px 0px;
+                  border: none;
+                  border-radius: 0;
+                }
+                ha-card > div {
+                  padding: 0px!important;
+                }
+                .type-custom-mini-graph-card .header {
+                  display: none !important; /* This hides the header text */
+                }
+                .type-custom-mini-graph-card .name {
+                  display: none !important; /* This hides the main name of the graph */
+                }
+                .type-custom-mini-graph-card .icon {
+                  display: none !important; /* This hides the icon if there's one */
+                }
+                .type-custom-mini-graph-card .state {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                  font-weight: 400;
+                  color: rgba(255, 255, 255, 0.8);
+                }
+                .type-custom-mini-graph-card .state .state__value {
+                  font-family: var(--primary-font-family);
+                }
+                .type-custom-mini-graph-card .state .state__uom {
+                  font-family: var(--primary-font-family);
+                  line-height: 1.5em;
+                }
+                .type-custom-mini-graph-card .state__time {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                }
+
+      #################################################
+      #                  MEDIA                        #
+      #################################################
+      - type: conditional
+        conditions:
+          - entity: input_text.active_spotify_player
+            state_not: "media_player.spotify"
+          - entity: input_text.active_spotify_player
+            state_not: "media_player.spotify_annawilmink"
+          - entity: sensor.nas_status
+            state: "false"
+        card:
+          type: markdown 
+          content: "NAS staat uit"  
+          card_mod:
+            style: | 
+              :host{
+                border:none;
+              }
+
+              ha-card {
+                text-align: center;
+                font-size: 2em;
+                font-weight: bold;
+                margin-top: 50vh;
+                border: none!important;
+              }
+
+      - type: conditional
+        conditions:
+          - entity: input_text.active_spotify_player
+            state_not: "media_player.spotify"
+          - entity: input_text.active_spotify_player
+            state_not: "media_player.spotify_annawilmink"
+          - entity: sensor.nas_status
+            state: "true"
+        card:
+          type: grid
+          view_layout:
+            grid-area: media
+          columns: 2
+          cards:
+            # Recently Added Movies Section
+            - type: "custom:upcoming-media-card"
+              max: 6
+              entity: sensor.recently_added_movies
+              title: Nieuwe films
+
+            # Recently Added TV Section
+            - type: "custom:upcoming-media-card"
+              max: 6
+              entity: sensor.recently_added_tv
+              title: Nieuwe series
+              card_mod:
+                style: |
+                  ha-card {
+                    background: none;
+                    box-shadow: none !important;
+                    border-radius: 1vw;
+                    overflow: hidden;
+                    width: 100%;
+                    border:none;
+                    margin-top:12vh;
+                    margin-bottom:-13vh;
+                  }
+                  card-header{
+                    font-weight: bold!important;
+                    font-size: 4em!important;
+                  }
+                  .rece_poster {
+                    width: 30.5% !important;
+                    display: inline-block !important;
+                    margin: 0% 0.8% !important;
+                    border-radius: 0.9vw;
+                  }
+                  .rece_svg_poster {
+                    position: absolute !important;
+                    bottom: -8%;
+                    left: 0;
+                    width: 100% !important;
+                    background: rgb(0,0,0);
+                    background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+                  }
+                  .rece_poster ha-icon {
+                    transform: scale(0.5);
+                  }
+                  .rece_flag_poster svg {
+                    filter: none;
+                    display: none;
+                  }
+                  .rece_container_poster {
+                    width: 100% !important;
+                    outline: none !important;
+                    margin: 1% 1% !important;
+                    overflow: hidden;
+                  }
+                  .rece_svg_poster > rect {
+                    fill: none !important;
+                  }
+                  .rece_line2_poster {
+                    display: none;
+                  }
+                  .rece_flag_poster {
+                    opacity: 0.5;
+                  }
+                  .card-header {
+                    font-size: 1vw;
+                    padding: 0 0.5vw;
+                    height: 4vh;
+                  }
+                  ha-icon{
+                    display:none;
+                  }
+
+      ## mike SPOTIFY
+      - type: conditional
+        conditions:
+          - entity: input_text.active_spotify_player
+            state: "media_player.spotify"
+        card:
+          type: grid
+          columns: 2
+          cards:
+            # Spoty Player (Mini Media Player)
+            - type: "custom:mini-media-player"
+              entity: media_player.spotify
+              artwork: full-cover
+              volume_step: 5
+              tap_action: !include popup/woonkamer_tv.yaml
+              hide:
+                power: true
+                progress: false
+                runtime: false
+                volume: true
+              name: Spotify Player
+              card_mod:
+                style: |
+                  ha-card {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 80vh;
+                    border-radius: 1vw;
+                    overflow: hidden;
+                    margin:10vh auto 0px auto;
+                  }
+                  :host #primaryProgress {
+                    background: #474A52 !important;
+                  }if
+          
+            # Spotify Playlists
+            - type: "custom:spotify-card-v2"
+              account: mike
+              limit: 8
+              always_play_random_song: true
+              hide_top_header: true
+              hide_playback_controls: true
+              hide_chromecast_devices: false
+              display_style: list
+              hide_warning: true
+              playlist_type: recently-played
+              card_mod:
+                style: |
+                  ha-card {
+                    border: none;
+                    margin-top: 13vh;
+                  }
+                  #header{
+                    display:none !important;
+                  }
+                  #content{
+                    border:none !important;
+                    background:none!important;
+                  }
+                  .playback-controls{
+                    display:none !important;
+                  }
+                  #header-track{
+                    display:none;
+                  }
+                  .list-item{
+                    overflow:hidden;
+                    border:none!important;
+                    background-color: rgb(17, 17, 17);
+                    position: relative;
+                    border-radius:1vw;
+                    height: 7vh;
+                    width: 90%;
+                    margin-bottom: 10px;
+                  }
+                  .list-item > p{
+                    white-space: nowrap;
+                    overflow: hidden;
+                    font-weight: 700;
+                  }
+                  .list-item .cover{
+                    height: 100%!important;
+                  }
+                  .list-item img {
+                    position: relative;
+                    width: 100%!important;
+                    max-width: none!important;
+                  }
+                  ha-card #footer{
+                    border-radius: 10px;
+                    background-color: rgb(17, 17, 17);
+                    margin-top:10px;
+                    padding: 0.5rem;
+                    width: 89%;
+                    border-radius:1vw;
+                  }
+                  ha-card #footer .footer__right svg{
+                    fill: #1DB954;
+                  }
+
+      ## ANNA SPOTIFY
+      - type: conditional
+        conditions:
+          - entity: input_text.active_spotify_player
+            state: "media_player.spotify_annawilmink"
+        card:
+          type: grid
+          columns: 2
+          cards:
+            # Spoty Player (Mini Media Player)
+            - type: "custom:mini-media-player"
+              entity: media_player.spotify_annawilmink
+              artwork: full-cover
+              volume_step: 5
+              hide:
+                power: true
+                progress: false
+                runtime: false
+                volume: true
+              name: Spotify Player
+              card_mod:
+                style: |
+                  ha-card {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 80vh;
+                    border-radius: 1vw;
+                    overflow: hidden;
+                    margin:10vh auto 0px auto;
+                  }
+                  :host #primaryProgress {
+                    background: #474A52 !important;
+                  }if
+          
+            # Spotify Playlists
+            - type: "custom:spotify-card-v2"
+              account: anna
+              limit: 8
+              always_play_random_song: true
+              hide_top_header: true
+              hide_playback_controls: true
+              hide_chromecast_devices: false
+              display_style: list
+              hide_warning: true
+              playlist_type: recently-played
+              card_mod:
+                style: |
+                  ha-card {
+                    border: none;
+                    margin-top: 13vh;
+                  }
+                  #header{
+                    display:none !important;
+                  }
+                  #content{
+                    border:none !important;
+                    background:none!important;
+                  }
+                  .playback-controls{
+                    display:none !important;
+                  }
+                  #header-track{
+                    display:none;
+                  }
+                  .list-item{
+                    overflow:hidden;
+                    border:none!important;
+                    background-color: rgb(17, 17, 17);
+                    position: relative;
+                    border-radius:1vw;
+                    height: 7vh;
+                    width: 90%;
+                    margin-bottom: 10px;
+                  }
+                  .list-item > p{
+                    white-space: nowrap;
+                    overflow: hidden;
+                    font-weight: 700;
+                  }
+                  .list-item .cover{
+                    height: 100%!important;
+                  }
+                  .list-item img {
+                    position: relative;
+                    width: 100%!important;
+                    max-width: none!important;
+                  }
+                  ha-card #footer{
+                    border-radius: 10px;
+                    background-color: rgb(17, 17, 17);
+                    margin-top:10px;
+                    padding: 0.5rem;
+                    width: 89%;
+                    border-radius:1vw;
+                  }
+                  ha-card #footer .footer__right svg{
+                    fill: #1DB954;
+                  }
+
+      # - type: conditional
+      #   conditions:
+      #     - entity: media_player.plex_plex_for_windows_desktop_vqi6kc7
+      #       state: "playing"
+      #     - entity: media_player.spotify
+      #       state_not: "playing"
+      #     - entity: media_player.spotify
+      #       state_not: "paused"
+      #   card:
+      #     type: grid
+      #     view_layout:
+      #       grid-area: media
+      #     columns: 2
+      #     cards:
+      #       # Plex Player (Large left side)
+      #       - type: "custom:mini-media-player"
+      #         entity: media_player.plex_plex_for_windows_desktop_vqi6kc7
+      #         artwork: full-cover
+      #         hide:
+      #           icon: true
+      #           mute: false
+      #           power: true
+      #           power_state: true
+      #         card_mod:
+      #           style: |
+      #             ha-card {
+      #               display: flex;
+      #               justify-content: center;
+      #               align-items: center;
+      #               height: 80vh;
+      #               border-radius: 1vw;
+      #               overflow: hidden;
+      #               margin:10vh auto 0px auto;
+      #             }
+
+      #       # Recently Added TV and Movies (Right side)
+      #       - type: vertical-stack
+      #         cards:
+      #           # Recently Added Movies Section
+      #           - type: "custom:upcoming-media-card"
+      #             max: 3
+      #             entity: sensor.recently_added_movies
+      #             title: Nieuwe films
+
+      #           # Recently Added tv Section
+      #           - type: "custom:upcoming-media-card"
+      #             max: 3
+      #             entity: sensor.recently_added_tv
+      #             title: Nieuwe series
+      #             card_mod:
+      #               style: |
+      #                 ha-card {
+      #                   background: none;
+      #                   box-shadow: none !important;
+      #                   border-radius: 1vw;
+      #                   overflow: hidden;
+      #                   width: 100%;
+      #                   border:none;
+      #                   margin-top:12vh;
+      #                   margin-bottom:-13vh;
+      #                 }
+      #                 .rece_poster {
+      #                   width: 30.5% !important;
+      #                   display: inline-block !important;
+      #                   margin: 0% 0.8% !important;
+      #                   border-radius: 0.9vw;
+      #                 }
+      #                 .rece_svg_poster {
+      #                   position: absolute !important;
+      #                   bottom: -8%;
+      #                   left: 0;
+      #                   width: 100% !important;
+      #                   background: rgb(0,0,0);
+      #                   background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      #                 }
+      #                 .rece_poster ha-icon {
+      #                   transform: scale(0.5);
+      #                 }
+      #                 .rece_flag_poster svg {
+      #                   filter: none;
+      #                   display: none;
+      #                 }
+      #                 .rece_container_poster {
+      #                   width: 100% !important;
+      #                   outline: none !important;
+      #                   margin: 1% 1% !important;
+      #                   overflow: hidden;
+      #                 }
+      #                 .rece_svg_poster > rect {
+      #                   fill: none !important;
+      #                 }
+      #                 .rece_line2_poster {
+      #                   display: none;
+      #                 }
+      #                 .rece_flag_poster {
+      #                   opacity: 0.5;
+      #                 }
+      #                 .card-header {
+      #                   font-size: 1vw;
+      #                   padding: 0 0.5vw;
+      #                   height: 4vh;
+      #                 }
+
+  #################################################
+  #               Neerslag sectie                 #
+  #################################################
+
+  - type: custom:grid-layout
+    title: Weer
+    layout:
+      #default
+      margin: 0
+      grid-gap: var(--custom-layout-card-padding)
+      grid-template-columns: 0.3fr 0.7fr
+      grid-template-areas: |
+        "sidebar weer"
+        "sidebar neerslag"
+
+    cards:
+      #################################################
+      #                    SIDEBAR                    #
+      #################################################
+      - type: vertical-stack
+        view_layout:
+          grid-area: sidebar
+        cards:
+          - type: custom:button-card
+            entity: sensor.template_sidebar
+            template: sidebar
+
+          - type: "custom:button-card"
+            name: "Home"
+            icon: mdi:home
+            tap_action:
+              action: navigate
+              navigation_path: "3?kiosk"
+            variables:
+              active: false
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Apparaten"
+            icon: mdi:devices
+            tap_action:
+              action: navigate
+              navigation_path: "0?kiosk"
+            variables:
+              active: false
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Media"
+            icon: mdi:music-circle-outline
+            tap_action:
+              action: navigate
+              navigation_path: "1?kiosk"
+            variables:
+              active: false
+              media: true
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - media_menu
+
+          - type: "custom:button-card"
+            name: "Weer"
+            entity: weather.buienradar
+            tap_action:
+              action: navigate
+              navigation_path: "2?kiosk"
+            variables:
+              sun: sun.sun
+              active: true
+              media: false
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - weather_menu
+
+          - type: custom:mod-card
+            style: |
+              ha-card {
+                margin-top: 2.5em;
+                padding: 0.5em var(--custom-layout-card-padding) 0 var(--custom-layout-card-padding);
+              }
+            card:
+              type: horizontal-stack
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          transition: none;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+          - type: custom:mini-graph-card
+            hours_to_show: 24
+            # color_thresholds_transition: hard
+            color_thresholds:
+              - value: 450 # Groen 0-450
+                color: "#80C994" 
+              - value: 700 # Oranje 450-700
+                color: "#FCD663" 
+              - value: 1000   # Rood 700-1000
+                color: "#F18B82"
+              - value: 1500 # Grijs 1000-1500
+                color: "#BBBBBB"
+            show:
+              legend: false
+              labels: false
+              labels_secondary: false
+            entities:
+              - entity: sensor.p1_meter_vermogen
+                show_fill: true
+              - entity: sensor.gemiddeld_vebruik_per_dag
+                color: "#205679"
+                show_fill: false 
+            card_mod:
+              style: |
+                ha-card.type-custom-mini-graph-card {
+                  padding: 0px 0px 0px;
+                  margin: 2.3em 0px 0px 0px;
+                  border: none;
+                  border-radius: 0;
+                }
+                ha-card > div {
+                  padding: 0px!important;
+                }
+                .type-custom-mini-graph-card .header {
+                  display: none !important; /* This hides the header text */
+                }
+                .type-custom-mini-graph-card .name {
+                  display: none !important; /* This hides the main name of the graph */
+                }
+                .type-custom-mini-graph-card .icon {
+                  display: none !important; /* This hides the icon if there's one */
+                }
+                .type-custom-mini-graph-card .state {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                  font-weight: 400;
+                  color: rgba(255, 255, 255, 0.8);
+                }
+                .type-custom-mini-graph-card .state .state__value {
+                  font-family: var(--primary-font-family);
+                }
+                .type-custom-mini-graph-card .state .state__uom {
+                  font-family: var(--primary-font-family);
+                  line-height: 1.5em;
+                }
+                .type-custom-mini-graph-card .state__time {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                }
+
+      # #################################################
+      # #                     Neerslag                  #
+      # #################################################
+      - type: custom:mod-card
+        style: |
+          ha-card{
+            background-color: none;
+            padding: 3.3vw 3.3vw 0 0
+          }
+        card:
+          type: vertical-stack
+          cards:
+            - type: custom:weather-card
+              name: ""
+              entity: weather.buienradar
+              current: true
+              details: true
+              forecast: true
+              card_mod:
+                style: |
+                  ha-card {
+                    border: none;
+                  }
+
+            - type: "custom:neerslag-card"
+              title: ""
+              entities:
+                - sensor.neerslag_buienalarm_regen_data
+                - sensor.neerslag_buienradar_regen_data
+              card_mod:
+                style: |
+                  ha-card {
+                    border: none;
+                    width: 90%;
+                    margin: 0px auto;
+                  }
+                  #neerslagChartContainer {
+                    height: 35vh; !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                  }
+  
+  #################################################
+  #               3D home sectie                 #
+  #################################################
+
+  - type: custom:grid-layout
+    title: 3DHome
+    layout:
+      #default
+      margin: 0
+      grid-gap: var(--custom-layout-card-padding)
+      grid-template-columns: 0.3fr 0.7fr
+      grid-template-areas: |
+        "sidebar 3Dhome"
+        "sidebar 3Dhome"
+
+    cards:
+      #################################################
+      #                    SIDEBAR                    #
+      #################################################
+      - type: vertical-stack
+        view_layout:
+          grid-area: sidebar
+        cards:
+          - type: custom:button-card
+            entity: sensor.template_sidebar
+            template: sidebar
+
+          - type: "custom:button-card"
+            name: "Home"
+            icon: mdi:home
+            tap_action:
+              action: navigate
+              navigation_path: "3?kiosk"
+            variables:
+              active: true
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Apparaten"
+            icon: mdi:devices
+            tap_action:
+              action: navigate
+              navigation_path: "0?kiosk"
+            variables:
+              active: false
+              media: false
+            show_name: true
+            show_entity: false
+            show_entity_picture: false
+            template:
+              - base_menu
+
+          - type: "custom:button-card"
+            name: "Media"
+            icon: mdi:music-circle-outline
+            tap_action:
+              action: navigate
+              navigation_path: "1?kiosk"
+            variables:
+              active: false
+              media: true
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - media_menu
+
+          - type: "custom:button-card"
+            name: "Weer"
+            entity: weather.buienradar
+            tap_action:
+              action: navigate
+              navigation_path: "2?kiosk"
+            variables:
+              sun: sun.sun
+              active: false
+              media: false
+            show_name: true
+            show_state: true
+            show_entity: false
+            show_entity_picture: true
+            template:
+              - base_menu
+              - weather_menu
+
+          - type: custom:mod-card
+            style: |
+              ha-card {
+                margin-top: 2.5em;
+                padding: 0.5em var(--custom-layout-card-padding) 0 var(--custom-layout-card-padding);
+              }
+            card:
+              type: horizontal-stack
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: device_tracker.mike
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/mike_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          width: 70%;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_home.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          transition: none;
+                          width: 70%;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+                - type: conditional
+                  conditions:
+                    - entity: person.anna
+                      state_not: "home"
+                  card:
+                    type: picture
+                    image: /local/anna_away.png
+                    tap_action: !include popup/mike.yaml
+                    card_mod:
+                      style: |
+                        ha-card {
+                          transition: none;
+                          width: 70%;
+                          margin-left:-15px;
+                          border-radius: 50%;
+                          border: none;
+                        }
+
+          - type: custom:mini-graph-card
+            hours_to_show: 24
+            # color_thresholds_transition: hard
+            color_thresholds:
+              - value: 450 # Groen 0-450
+                color: "#80C994" 
+              - value: 700 # Oranje 450-700
+                color: "#FCD663" 
+              - value: 1000   # Rood 700-1000
+                color: "#F18B82"
+              - value: 1500 # Grijs 1000-1500
+                color: "#BBBBBB"
+            show:
+              legend: false
+              labels: false
+              labels_secondary: false
+            entities:
+              - entity: sensor.p1_meter_vermogen
+                show_fill: true
+              - entity: sensor.gemiddeld_vebruik_per_dag
+                color: "#205679"
+                show_fill: false 
+            card_mod:
+              style: |
+                ha-card.type-custom-mini-graph-card {
+                  padding: 0px 0px 0px;
+                  margin: 2.3em 0px 0px 0px;
+                  border: none;
+                  border-radius: 0;
+                }
+                ha-card > div {
+                  padding: 0px!important;
+                }
+                .type-custom-mini-graph-card .header {
+                  display: none !important; /* This hides the header text */
+                }
+                .type-custom-mini-graph-card .name {
+                  display: none !important; /* This hides the main name of the graph */
+                }
+                .type-custom-mini-graph-card .icon {
+                  display: none !important; /* This hides the icon if there's one */
+                }
+                .type-custom-mini-graph-card .state {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                  font-weight: 400;
+                  color: rgba(255, 255, 255, 0.8);
+                }
+                .type-custom-mini-graph-card .state .state__value {
+                  font-family: var(--primary-font-family);
+                }
+                .type-custom-mini-graph-card .state .state__uom {
+                  font-family: var(--primary-font-family);
+                  line-height: 1.5em;
+                }
+                .type-custom-mini-graph-card .state__time {
+                  padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+                }
+
+      # #################################################
+      # #                  3DHome                       #
+      # #################################################
+      - type: 'custom:config-template-card'
+        entities:
+          - light.badkamer
+          - light.hal
+          - light.kantoor
+          - light.keuken
+          - light.plafond_lampen
+          - light.slaapkamer
+          - light.toilet
+          - light.tv
+          - light.washok
+        card:
+          ###################   Picture Elements Card    #####################
+          type: picture-elements
+          image: /local/transparent.png
+          card_mod:
+            style: |
+              ha-card {
+                transition: none;
+                position: absolute;
+                overflow: hidden;
+                width: 55em!important;
+                right: 10px;
+                height: auto!important;
+                margin: auto;
+                border: none;
+              }
+          
+          elements:
+              #########################    DAY BASE FLOORPLAN OVERLAY    #########################
+            - action: none
+              entity: sun.sun
+              hold_action:
+                action: none
+              state_image:
+                above_horizon: /local/home3d/dag.png
+                below_horizon: /local/home3d/avond.png
+              style:
+                mix-blend-mode: lighten
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+              type: image
+
+
+              #########################    INDIVIDUAL LIGHTS - BLENDED IMAGE OVERLAYS    #########################
+            - type: image 
+              action: none
+              entity: light.keuken
+              hold_action:
+                action: none
+              image: /local/home3d/keuken.png
+              style:
+                # filter: >-
+                #   ${ "hue-rotate(" + (states['light.keuken'].attributes.hs_color
+                #   ? states['light.keuken'].attributes.hs_color[0] : 0) + "deg)"}
+                mix-blend-mode: lighten
+                opacity: "${states['light.keuken'].state === 'on' ? (states['light.keuken'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+
+            - type: image 
+              action: none
+              entity: light.eettafel
+              hold_action:
+                action: none
+              image: /local/home3d/eettafel.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.eettafel'].state === 'on' ? (states['light.eettafel'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+                
+            - type: image 
+              action: none
+              entity: light.kantoor
+              hold_action:
+                action: none
+              image: /local/home3d/kantoor.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.kantoor'].state === 'on' ? (states['light.kantoor'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+
+            - type: image 
+              action: none
+              entity: light.tv
+              hold_action:
+                action: none
+              image: /local/home3d/tv_links.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.tv'].state === 'on' ? (states['light.tv'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+            
+            - type: image 
+              action: none
+              entity: light.tv
+              hold_action:
+                action: none
+              image: /local/home3d/tv_rechts.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.tv'].state === 'on' ? (states['light.tv'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+            
+            - type: image 
+              action: none
+              entity: light.hal
+              hold_action:
+                action: none
+              image: /local/home3d/hal.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.hal'].state === 'on' ? (states['light.hal'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+
+            - type: image 
+              action: none
+              entity: light.slaapkamer
+              hold_action:
+                action: none
+              image: /local/home3d/slaapkamer.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.slaapkamer'].state === 'on' ? (states['light.slaapkamer'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+  
+
+            - type: image 
+              action: none
+              entity: light.badkamer
+              hold_action:
+                action: none
+              image: /local/home3d/douche.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.badkamer'].state === 'on' ? (states['light.badkamer'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+
+            - type: image 
+              action: none
+              entity: light.toilet
+              hold_action:
+                action: none
+              image: /local/home3d/wc.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.toilet'].state === 'on' ? (states['light.toilet'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+
+            - type: image 
+              action: none
+              entity: light.washok
+              hold_action:
+                action: none
+              image: /local/home3d/washok.png
+              style:
+                mix-blend-mode: lighten
+                opacity: "${states['light.washok'].state === 'on' ? (states['light.washok'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 40%
+                width: 80%
+              tap_action:
+                action: none
+          
+            #########################    TEMP SENSOR HUISKAMER  #########################
+            - entity: sensor.lumi_temperature
+              state_display: >
+                [[[
+                  return parseFloat(entity.state).toFixed(1) + ' °C';
+                ]]]
+              show_icon: false
+              show_state: true
+              show_name: false
+              type: custom:button-card
+              style:
+                top: 320px
+                left: 200px
+                border: none
+                transform: rotateY(32deg) rotateX(32deg)
+                rotate: 13deg
+              styles:
+                card:
+                  - border: none
+                state:
+                  - color: rgba(224, 225, 225, 0.6)
+
+            - entity: sensor.lumi_humidity
+              state_display: >
+                [[[
+                  return parseFloat(entity.state).toFixed(1) + ' °C';
+                ]]]
+              show_icon: false
+              show_state: true
+              show_name: false
+              type: custom:button-card
+              style:
+                top: 337px
+                left: 202px
+                border: none
+                transform: rotateY(32deg) rotateX(32deg)
+                rotate: 13deg
+              styles:
+                card:
+                  - border: none
+                state:
+                  - color: rgba(224, 225, 225, 0.6)
+
+
+
+            #########################    Buiten weer    #########################
+            - entity: weather.buienradar
+              state_display: > 
+                [[[
+                  const temp = hass.states["weather.buienradar"]?.attributes?.temperature ?? N/A;
+                  const tempUnit = hass.states["weather.buienradar"]?.attributes?.temperature_unit ?? "";
+
+                  return temp+tempUnit;
+                ]]] 
+              show_icon: false
+              show_state: true
+              show_name: false
+              type: custom:button-card
+              style:
+                top: 510px
+                left: 220px
+                border: none
+                transform: rotateY(32deg) rotateX(36deg)
+                rotate: 15deg
+              styles:
+                card:
+                  - border: none
+                state:
+                  - color: rgb(25, 30, 32, 0.6)
+
+            - entity: weather.buienradar
+              show_icon: false
+              show_state: true
+              show_name: false
+              type: custom:button-card
+              style:
+                top: 525px
+                left: 224px
+                border: none
+                transform: rotateY(32deg) rotateX(36deg)
+                rotate: 15deg
+              styles:
+                card:
+                  - border: none
+                state:
+                  - color: rgb(25, 30, 32, 0.6)
+
+            #########################    INDIVIDUAL LIGHT ICONS    #########################
+            - entity: light.eettafel 
+              type: custom:button-card
+              variables:
+                top: -315px;
+                left: 380px;
+              template: base_3dbuttons
+
+            - entity: light.salontafel 
+              type: custom:button-card
+              variables:
+                top: -350px;
+                left: 220px;
+              template: base_3dbuttons
+
+            - entity: light.keuken 
+              type: custom:button-card
+              variables:
+                top: -380px;
+                left: 450px;
+              template: base_3dbuttons
+            
+            - entity: light.kantoor 
+              type: custom:button-card
+              variables:
+                top: -620px;
+                left: 340px;
+              template: base_3dbuttons
+              
+            - entity: light.tv 
+              type: custom:button-card
+              variables:
+                top: -360px;
+                left: 100px;
+              template: base_3dbuttons
+          
+            - entity: light.hal 
+              type: custom:button-card
+              variables:
+                top: -530px;
+                left: 435px;
+              template: base_3dbuttons
+            
+            - entity: light.slaapkamer 
+              type: custom:button-card
+              variables:
+                top: -530px;
+                left: 300px;
+              template: base_3dbuttons
+
+            - entity: light.badkamer 
+              type: custom:button-card
+              variables:
+                top: -530px;
+                left: 555px;
+              template: base_3dbuttons
+
+            - entity: light.toilet 
+              type: custom:button-card
+              variables:
+                top: -550px;
+                left: 500px;
+              template: base_3dbuttons
+            
+            - entity: light.washok 
+              type: custom:button-card
+              variables:
+                top: -580px;
+                left: 535px;
+              template: base_3dbuttons
+
+            

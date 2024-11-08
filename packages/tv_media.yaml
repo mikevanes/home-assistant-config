@@ -1,0 +1,214 @@
+homeassistant:
+  customize:
+    media_player.spotify:
+      friendly_name: Spotify
+
+input_text:
+  active_spotify_player:
+    name: Active Spotify Player
+    initial: ""
+
+# [lg]webostvoled55c46la
+# [lg]webostvoled55c46la
+
+script:
+  select_active_spotify_player:
+    alias: "Select Active Spotify Player"
+    sequence:
+      - variables:
+          active_spotify_player: >
+            {% if (is_state('media_player.spotify', 'playing') or is_state('media_player.spotify', 'paused')) and 
+                  state_attr('media_player.spotify', 'source') | lower | trim | replace(' ', '') == '[lg]webostvoled55c46la' %}
+              media_player.spotify
+            {% elif (is_state('media_player.spotify_annawilmink', 'playing') or is_state('media_player.spotify_annawilmink', 'paused')) and 
+                  state_attr('media_player.spotify_annawilmink', 'source') | lower | trim | replace(' ', '') == '[lg]webostvoled55c46la' %}
+              media_player.spotify_annawilmink
+            {% else %}
+              ''
+            {% endif %}
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.active_spotify_player
+        data:
+          value: "{{ active_spotify_player }}"
+
+  toggle_tv_power:
+    alias: Toggle TV Power
+    sequence:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ not is_state('media_player.tv', 'off') }}"
+            sequence:
+              - action: media_player.turn_off
+                target:
+                  entity_id: media_player.tv
+          - conditions:
+              - condition: state
+                entity_id: media_player.tv
+                state: 'off'
+            sequence:
+              - action: wake_on_lan.send_magic_packet
+                data:
+                  mac: !secret tvmac
+              - delay: 00:00:5 # Tv aan laten gaan.
+              - choose:
+                # Mike's account is vrij, gebruik die. 
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: media_player.spotify
+                          state: 'playing'
+                  sequence:
+                    - action: spotcast.start
+                      data:
+                        account: "mike"
+                        entity_id: media_player.lg_webos_tv_oled55c46la
+                        shuffle: true
+                        random_song: true
+                        playlist_name: "daylist"
+                        
+                # Mike's account is niet vrij, gebruik die van Anna.
+                - conditions:
+                    - condition: state
+                      entity_id: media_player.spotify
+                      state: 'playing'
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: media_player.spotify_annawilmink
+                          state: 'playing'
+                  sequence:
+                    - action: spotcast.start
+                      data:
+                        account: "anna"
+                        entity_id: media_player.lg_webos_tv_oled55c46la
+                        shuffle: true
+                        random_song: true
+                        playlist_name: "daylist"
+automation:
+  - alias: "Set active spotify player when spotify state changes"
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id:
+          - media_player.spotify
+          - media_player.spotify_annawilmink
+    conditions: []
+    actions:
+      - action: script.select_active_spotify_player
+
+  - alias: "Switch to Anna's Account if Spotify Source Changes"
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id:
+          - media_player.spotify
+        attribute: source
+        from: "[LG] webOS TV OLED55C46LA"
+        to: "iPhone"
+      - trigger: state
+        entity_id:
+          - media_player.spotify
+        attribute: source
+        from: "[LG] webOS TV OLED55C46LA"
+        to: "DESKTOP-VQI6KC7"
+    conditions:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: media_player.spotify_annawilmink
+            state: "off"
+          - condition: state
+            entity_id: media_player.spotify_annawilmink
+            state: idle
+          - condition: state
+            entity_id: media_player.spotify_annawilmink
+            state: standby
+          - condition: state
+            entity_id: media_player.spotify_annawilmink
+            state: paused
+    actions:
+      - action: spotcast.start
+        data:
+          account: "anna"
+          entity_id: media_player.lg_webos_tv_oled55c46la
+          shuffle: true
+          random_song: true
+          force_playback: true
+
+  - alias: "Switch to Mike's Account if Anna's Spotify Source Changes"
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id:
+          - media_player.spotify_annawilmink
+        attribute: Source
+        from: "[LG] webOS TV OLED55C46LA"
+        to: "iPhone"
+    conditions:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: media_player.spotify
+            state: "off"
+          - condition: state
+            entity_id: media_player.spotify
+            state: idle
+          - condition: state
+            entity_id: media_player.spotify
+            state: standby
+          - condition: state
+            entity_id: media_player.spotify
+            state: paused
+    actions:
+      - action: spotcast.start
+        data:
+          account: "mike"
+          entity_id: media_player.lg_webos_tv_oled55c46la
+          shuffle: true
+          random_song: true
+          force_playback: true
+    
+
+# template:
+#   - select:
+#       - name: conditional_media
+#         state: >
+#           {% set recently_added = 'Onlangs toegevoegd' %}
+#           {% set paused_timeout_minutes = 15 %}
+#           {% set media_players = [ states.media_player.spotify ] %}
+
+#           {% macro media(state) %}
+#           {% set state = media_players | selectattr('state','eq',state) | list %}
+#           {% set last_changed = recently_added if state | length == 0 else state | map(attribute='last_changed') | list | max %}
+#             {{ state | selectattr('last_changed','eq', last_changed) | map(attribute='name') | list | join }}
+#           {% endmacro %}
+
+#           {% set playing = media_players | selectattr('state','eq','playing') | list %}
+#           {% set timeout_playing = False if playing | length == 0 else
+#             (as_timestamp(now()) - as_timestamp(playing | map(attribute='last_changed') | list | max)) < paused_timeout_minutes * 60 %}
+
+#           {% set paused = media_players | selectattr('state','eq','paused') | list %}
+#           {% set timeout_paused = False if paused | length == 0 else
+#             (as_timestamp(now()) - as_timestamp(paused | map(attribute='last_changed') | list | max)) < paused_timeout_minutes * 60 %}
+
+#           {% if playing %}
+#             {{ media('playing') if timeout_playing else media('paused') if timeout_paused else media('playing') }}
+#           {% elif paused %}
+#             {{ media('paused') if timeout_paused else recently_added }}
+#           {% else %}
+#             {{ recently_added }}
+#           {% endif %}
+#         options: >
+#           {% set recently_added = [ 'Onlangs toegevoegd' ] %}
+#           {% set media_players = [ states.media_player.spotify ] %}
+#           {{ recently_added + media_players | map(attribute='name') | list }}
+#         select_option:
+#           service: select.select_option
+#           target:
+#             entity_id: select.conditional_media
+#           data:
+#             option: >
+#               spotify

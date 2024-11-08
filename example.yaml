@@ -1,0 +1,324 @@
+views:
+  - title: Home
+    cards:
+      - type: 'custom:config-template-card'
+        entities:
+          - light.all_lights
+          - light.plafondlamp_bed_light
+          - light.plafondlamp_pc_light
+        card:
+          ###################   Picture Elements Card    #####################
+          type: picture-elements
+          image: /local/home3d/avond.png
+          style: |
+            ha-card:first-child {
+              background: rgba(42, 46, 48, 1)
+            }
+          elements:
+              #########################    DAY BASE FLOORPLAN OVERLAY    #########################
+
+            - action: none
+              entity: sun.sun
+              hold_action:
+                action: none
+              state_image:
+                above_horizon: /local/home3d/overdag.png
+                below_horizon: /local/transparent.png
+              style:
+                mix-blend-mode: lighten
+                opacity: '${ states[''sensor.sunlight_opacity''].state }'
+                top: 50%
+                left: 50%
+                width: 100%
+                height: 100%
+              tap_action:
+                action: none
+              type: image
+
+
+              #########################    INDIVIDUAL LIGHTS - BLENDED IMAGE OVERLAYS    #########################
+
+            - type: image 
+              action: none
+              entity: light.plafondlamp_bed_light
+              hold_action:
+                action: none
+              image: /local/home3d/keuken.png
+              style:
+                filter: >-
+                  ${ "hue-rotate(" + (states['light.plafondlamp_bed_light'].attributes.hs_color
+                  ? states['light.plafondlamp_bed_light'].attributes.hs_color[0] : 0) + "deg)"}
+                mix-blend-mode: lighten
+                opacity: "${states['light.plafondlamp_bed_light'].state === 'on' ? (states['light.plafondlamp_bed_light'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 50%
+                width: 100%
+                height: 100%
+              tap_action:
+                action: none
+                
+            - type: image 
+              action: none
+              entity: light.plafondlamp_pc_light
+              hold_action:
+                action: none
+              image: /local/home3d/kantoor.png
+              style:
+                filter: >-
+                  ${ "hue-rotate(" + (states['light.plafondlamp_pc_light'].attributes.hs_color
+                  ? states['light.plafondlamp_pc_light'].attributes.hs_color[0] : 0) + "deg)"}
+                mix-blend-mode: lighten
+                opacity: "${states['light.plafondlamp_pc_light'].state === 'on' ? (states['light.plafondlamp_pc_light'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 50%
+                width: 100%
+                height: 100%
+              tap_action:
+                action: none
+
+            - type: image 
+              action: none
+              entity: light.all_lights
+              hold_action:
+                action: none
+              image: /local/home3d/tv.png
+              style:
+                filter: >-
+                  ${ "hue-rotate(" + (states['light.all_lights'].attributes.hs_color
+                  ? states['light.all_lights'].attributes.hs_color[0] : 0) + "deg)"}
+                mix-blend-mode: lighten
+                opacity: "${states['light.all_lights'].state === 'on' ? (states['light.all_lights'].attributes.brightness / 255) : '0'}"
+                top: 50%
+                left: 50%
+                width: 100%
+                height: 100%
+              tap_action:
+                action: none
+          
+              
+              
+              #########################    INDIVIDUAL LIGHT ICONS    #########################
+
+              #  These are the white state icons that appear over the floorplan.
+              #  They are the same as above, but instead of "areas" to control a group, they only
+              #. control individual lights
+              #
+              #  browser_mod.popup is used for a tap and hold for a custom popup card, custom styling
+              #  of the icon to make it appear white, etc.
+
+
+            - entity: light.plafondlamp_bed_light
+              type: custom:button-card
+              style:
+                left: 0.5%
+                top: 54.5%
+              icon: mdi:google-circles-communities
+              show_state: false
+              show_icon: true
+              show_name: false
+              show_label: false
+              color_type: icon
+              color: rgb(255, 159, 0)
+              color_off: rgb(255, 255, 255)
+              size: 55%
+              tap_action:
+                action: toggle
+                haptic: light
+              styles:
+                card:
+                  - width: 4vw
+                  - height: 4vw
+                  - borderRadius: 10vw
+                  - background-color: >
+                      [[[ return (entity.state === 'on' ) ? 'rgba(255, 255, 255, 1.0)' : 'rgba(115, 115, 115, 0.6)'; ]]]
+              variables:
+                circle_input: >
+                  [[[ return Math.round(entity.attributes.brightness / 2.54); ]]]
+              hold_action:
+                action: fire-dom-event
+                browser_mod:
+                  command: popup
+                  style:
+                    $: |
+                      s.popup-inner{
+                        padding: 15px 0 30px 0;
+                      }
+                      .mdc-dialog .mdc-dialog__container {
+                      }
+                      .mdc-dialog .mdc-dialog__container .mdc-dialog__surface {
+                        border-radius: 2vw;
+                      }
+                      .mdc-dialog .mdc-dialog__scrim {
+                          backdrop-filter: blur(10px);
+                      }
+                      ha-svg-icon {
+                          margin-top:-7px;
+                      }
+                    .: |
+                      :host {
+                        --mdc-dialog-scrim-color: rgba(0,0,0,0.5);
+                      }
+                      mwc-icon-button {
+                        color: #FFF;
+                      }
+                  title: >
+                    [[[ return entity.attributes.friendly_name ]]]
+                  card:
+                    type: entities
+                    entities:
+                      - type: custom:light-popup-card
+                        entity: >
+                          [[[ return entity.entity_id ]]]
+                        icon: none
+                        hideIcon: true
+                        fullscreen: false
+                        brightnessWidth: 130px
+                        brightnessHeight: 360px
+                        borderRadius: 1.7em
+                        sliderColor: '#c7c7c7'
+                        sliderTrackColor: rgba(25, 25, 25, 0.9)
+
+            - entity: light.plafondlamp_pc_light
+              type: custom:button-card
+              style:
+                left: 0%
+                top: 31%
+              icon: mdi:google-circles-communities
+              show_state: false
+              show_icon: true
+              show_name: false
+              show_label: false
+              color_type: icon
+              color: rgb(255, 159, 0)
+              color_off: rgb(255, 255, 255)
+              size: 55%
+              tap_action:
+                action: toggle
+                haptic: light
+              styles:
+                card:
+                  - width: 4vw
+                  - height: 4vw
+                  - borderRadius: 10vw
+                  - background-color: >
+                      [[[ return (entity.state === 'on' ) ? 'rgba(255, 255, 255, 1.0)' : 'rgba(115, 115, 115, 0.6)'; ]]]
+              variables:
+                circle_input: >
+                  [[[ return Math.round(entity.attributes.brightness / 2.54); ]]]
+              hold_action:
+                action: fire-dom-event
+                browser_mod:
+                  command: popup
+                  style:
+                    $: |
+                      s.popup-inner{
+                        padding: 15px 0 30px 0;
+                      }
+                      .mdc-dialog .mdc-dialog__container {
+                      }
+                      .mdc-dialog .mdc-dialog__container .mdc-dialog__surface {
+                        border-radius: 2vw;
+                      }
+                      .mdc-dialog .mdc-dialog__scrim {
+                          backdrop-filter: blur(10px);
+                      }
+                      ha-svg-icon {
+                          margin-top:-7px;
+                      }
+                    .: |
+                      :host {
+                        --mdc-dialog-scrim-color: rgba(0,0,0,0.5);
+                      }
+                      mwc-icon-button {
+                        color: #FFF;
+                      }
+                  title: >
+                    [[[ return entity.attributes.friendly_name ]]]
+                  card:
+                    type: entities
+                    entities:
+                      - type: custom:light-popup-card
+                        entity: >
+                          [[[ return entity.entity_id ]]]
+                        icon: none
+                        hideIcon: true
+                        fullscreen: false
+                        brightnessWidth: 130px
+                        brightnessHeight: 360px
+                        borderRadius: 1.7em
+                        sliderColor: '#c7c7c7'
+                        sliderTrackColor: rgba(25, 25, 25, 0.9)
+
+            - entity: light.all_lights
+              type: custom:button-card
+              style:
+                left: 0%
+                top: 17%
+              icon: mdi:google-circles-communities
+              show_state: false
+              show_icon: true
+              show_name: false
+              show_label: false
+              color_type: icon
+              color: rgb(255, 159, 0)
+              color_off: rgb(255, 255, 255)
+              size: 55%
+              tap_action:
+                action: toggle
+                haptic: light
+              styles:
+                card:
+                  - width: 4vw
+                  - height: 4vw
+                  - borderRadius: 10vw
+                  - background-color: >
+                      [[[ return (entity.state === 'on' ) ? 'rgba(255, 255, 255, 1.0)' : 'rgba(115, 115, 115, 0.6)'; ]]]
+              variables:
+                circle_input: >
+                  [[[ return Math.round(entity.attributes.brightness / 2.54); ]]]
+              hold_action:
+                action: fire-dom-event
+                browser_mod:
+                  command: popup
+                  style:
+                    $: |
+                      s.popup-inner{
+                        padding: 15px 0 30px 0;
+                      }
+                      .mdc-dialog .mdc-dialog__container {
+                      }
+                      .mdc-dialog .mdc-dialog__container .mdc-dialog__surface {
+                        border-radius: 2vw;
+                      }
+                      .mdc-dialog .mdc-dialog__scrim {
+                          backdrop-filter: blur(10px);
+                      }
+                      ha-svg-icon {
+                          margin-top:-7px;
+                      }
+                    .: |
+                      :host {
+                        --mdc-dialog-scrim-color: rgba(0,0,0,0.5);
+                      }
+                      mwc-icon-button {
+                        color: #FFF;
+                      }
+                  title: >
+                    [[[ return entity.attributes.friendly_name ]]]
+                  card:
+                    type: entities
+                    entities:
+                      - type: custom:light-popup-card
+                        entity: >
+                          [[[ return entity.entity_id ]]]
+                        icon: none
+                        hideIcon: true
+                        fullscreen: false
+                        brightnessWidth: 130px
+                        brightnessHeight: 360px
+                        borderRadius: 1.7em
+                        sliderColor: '#c7c7c7'
+                        sliderTrackColor: rgba(25, 25, 25, 0.9)
+
+
+            

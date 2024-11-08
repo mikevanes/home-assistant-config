@@ -1,0 +1,85 @@
+- sensor:
+    - unique_id: sidebar
+      state: template
+      attributes:
+        greet: >
+          <b>
+          {% set time = now().hour %}
+          {% if time <= 1 %} Goedenacht {{'\U0001F611'}}
+          {% elif time <= 3 %} Goedenacht {{'\U0001F62A'}}
+          {% elif time <= 5 %} Goedenacht {{'\U0001F634'}}
+          {% elif time <= 7 %} Goedenmorgen {{'\U0001F4A9'}}
+          {% elif time <= 9 %} Goedenmorgen {{'\u2615\uFE0F'}}
+          {% elif time <= 10 %} Goedenmorgen {{'\U0001F642'}}
+          {% elif time <= 11 %} Goedenmorgen {{'\U0001F642'}}
+          {% elif time <= 12 %} Goedenmorgen {{'\U0001F642'}}
+          {% elif time <= 13 %} Goedemiddag {{'\U0001F60A'}}
+          {% elif time <= 15 %} Goedemiddag {{'\U0001F60E'}}
+          {% elif time <= 17 %} Goedemiddag {{'\U0001F44B\U0001F3FB'}}
+          {% elif time <= 19 %} Goedenavond {{'\U0001F44B\U0001F3FB'}}
+          {% elif time <= 22 %} Goedenavond {{'\U0001F60C'}}
+          {% elif time <= 23 %} Goedenavond {{'\U0001F974'}}
+          {% else %} Goedendag {{'\U0001F974'}}
+          {% endif %}
+          </b>
+        time: >
+          {% set hours = now().strftime('%H') %}
+          {% set minutes = now().strftime('%M') %}
+          <span class="time">
+            {{ hours }}<span class="time-colon">:</span>{{ minutes }}
+          </span>
+        date: >
+          <font color='#6a7377'><b>
+            {% set full_date = states('sensor.full_date_written') %}
+            {{ full_date }}
+          </b></font>
+        active: >
+          <b>
+          {% set lights = [
+            states.light.badkamer,
+            states.light.eettafel,
+            states.light.salontafel,
+            states.light.hal,
+            states.light.kantoor,
+            states.light.keuken,
+            states.light.slaapkamer,
+            states.light.toilet,
+            states.light.tv,
+            states.light.washok
+          ] %}
+
+          {% set devices = [
+            states.media_player.tv
+          ] %}
+
+          {% set lights_on = lights | selectattr('state','eq','on') | list %}
+          {% set lights_name = lights | selectattr('state','eq','on') | map(attribute='name') | join(', ') %}
+
+          {% set devices_on = devices | selectattr('state','search','(on|cool|fan_only|playing)') | list %}
+          {% set devices_name = devices_on | map(attribute='name') | join(', ') %}
+
+          {% if (lights_on | length == 0) and (devices_on | length > 0) %}
+            De tv is aan
+
+          {% elif (lights_on | length == 1) and (devices_on | length == 1) %}
+            {{ lights_on | length }} lamp en de tv staan aan
+
+          {% elif (lights_on | length == 1) and (devices_on | length > 1) %}
+            {{ lights_on | length }} lamp en de tv staan aan
+
+          {% elif (lights_on | length > 1) and (devices_on | length == 1) %}
+            {{ lights_on | length }} lampen en de tv zijn aan
+
+          {% elif (lights_on | length > 1) and (devices_on | length > 1) %}
+            {{ lights_on | length }} lampen, de tv zijn aan
+
+          {% elif (lights_on | length == 1) and (devices_on | length == 0) %}
+            {{ lights_on | length }} lamp is aan
+
+          {% elif (lights_on | length > 1) and (devices_on | length == 0) %}
+            Er staan {{ lights_on | length }} lampen aan
+
+          {% else %}
+            <font color='#6a7377'>Alles staat uit</font>
+          {% endif %}
+          </b>

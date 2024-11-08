@@ -1,0 +1,21 @@
+settings:
+  variables:
+    entity_tablet: switch.galaxy_tab_a_screensaver
+    entity_browser_mod: media_player.tablet
+
+    translate_unknown: Onbekend
+    translate_idle: Idle
+    translate_home: Thuis
+    translate_not_home: Weg
+    translate_available: Beschikbaar
+    translate_no_updates: Geen updates
+    translate_update_available: Update beschikbaar
+    translate_updates_available: Updates beschikbaar
+
+    translate_on: Aan
+    translate_off: Uit
+    translate_cool: Cool
+    translate_fan_only: Alleen fan
+    translate_playing: Speelt af
+    translate_paused: Gepauzeerd
+    translate_standby: Stand by

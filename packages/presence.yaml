@@ -1,0 +1,94 @@
+automation:
+  ######### WC #################
+  - alias: "WC aan, bij bezetting"
+    description: "Turn on WC light when occupied"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.presence_wc_presence
+        to: 'on'
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.toilet
+
+  - alias: "WC uit, zonder bezetting"
+    description: "Turn off WC light when unoccupied"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.presence_wc_presence
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: light.toilet
+        state: 'on'
+    action:
+      - service: light.turn_off
+        target:
+          entity_id: light.toilet
+
+  ######### BADKAMER #################
+  - alias: "Douche aan, bij bezetting"
+    description: "Turn on shower light when occupied"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.presence_douche_presence
+        to: 'on'
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.badkamer
+
+  - alias: "Douche uit, zonder bezetting"
+    description: "Turn off shower light when unoccupied"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.presence_douche_presence
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: light.badkamer
+        state: 'on'
+    action:
+      - service: light.turn_off
+        target:
+          entity_id: light.badkamer
+
+  ######### Washok #################
+  - alias: "Washok aan, bij bezetting"
+    description: "Turn on shower light when occupied"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.presence_washok_presence
+        to: 'on'
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.washok
+
+  - alias: "Washok uit, zonder bezetting"
+    description: "Turn off shower light when unoccupied"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.presence_washok_presence
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: light.washok
+        state: 'on'
+    action:
+      - service: light.turn_off
+        target:
+          entity_id: light.washok
+
+
+
+  
+
+
+

@@ -1,0 +1,95 @@
+shell_command:
+  pc_off_mike: !secret pcoff
+  pc_sleep_mike: !secret pcsleep
+  pc_restart_mike: !secret pcrestart
+
+input_boolean:
+  pc_mike_lock:
+    name: pc_mike_lock
+    icon: cil:lock
+
+  pc_mike_test:
+    name: pc_mike_test
+
+switch:
+  - platform: wake_on_lan
+    name: pc_mike_wol
+    broadcast_port: 9
+    mac: !secret pcmac
+
+  - platform: template
+    switches:
+      pc_mike:
+        friendly_name: pc_mike
+        icon_template: cil:imac-alternative
+        value_template: >
+          {{ is_state('switch.pc_mike_wol', 'on') }}
+        turn_on:
+          - action: wake_on_lan.send_magic_packet
+            data:
+              mac: !secret pcmac
+        turn_off:
+          if:
+            condition: state
+            entity_id: input_boolean.pc_mike_lock
+            state: "off"
+          then:
+            - action: shell_command.pc_off_mike
+            - action: homeassistant.turn_off
+              target:
+                entity_id: switch.pc_mike_wol
+
+automation:
+  - alias: "Turn off pc_mike when session is unavailable"
+    trigger:
+      - platform: time_pattern
+        minutes: "*"
+    condition:
+      - condition: template
+        value_template: "{{ states('sensor.pc_mike_session') == 'unavailable' }}"
+    action:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.pc_mike_wol
+
+  - alias: "Set lock on boot"
+    trigger:
+      - platform: time_pattern
+        minutes: "*"
+    condition:
+      - condition: template
+        value_template: "{{ states('sensor.pc_mike_session') == 'unlocked' }}"
+    action:
+      - action: switch.turn_on
+        target:
+          entity_id: input_boolean.pc_mike_lock
+
+  - alias: Set pc_mike_lock and active based on session lock state and turn on PC when sensor information is in.
+    description: ""
+    trigger:
+      - platform: state
+        entity_id: sensor.pc_mike_session
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: sensor.pc_mike_session
+                state: Unlocked
+            sequence:
+              - target:
+                  entity_id: input_boolean.pc_mike_lock
+                action: input_boolean.turn_on
+          - conditions:
+              - condition: template
+                value_template:
+                  "{{ is_state('sensor.pc_mike_session', 'unavailable')
+                  or is_state('sensor.pc_mike_session', 'unknown')
+                  or is_state('sensor.pc_mike_session', 'locked') }}"
+            sequence:
+              - target:
+                  entity_id: input_boolean.pc_mike_lock
+                action: input_boolean.turn_off
+      - action: switch.turn_on
+        target:
+          entity_id: switch.pc_mike_wol
+    mode: single

@@ -1,0 +1,68 @@
+template:
+  - sensor:
+      - name: "Mike update info"
+        unique_id: "mike_update_info"
+        state: >
+          {% set last_changed = states.person.mike.last_changed %}
+          {% set diff = (now() - last_changed).total_seconds() %}
+          {% if diff < 60 %}
+            Zojuist
+          {% elif diff < 3600 %}
+            {{ (diff / 60) | int }} minuten geleden
+          {% elif diff < 86400 %}
+            {{ (diff / 3600) | int }} uur geleden
+          {% else %}
+            {{ (diff / 86400) | int }} dagen geleden
+          {% endif %}
+
+  - sensor:
+      - name: "Anna update info"
+        unique_id: "anna_update_info"
+        state: >
+          {% set last_changed = states.person.anna.last_changed %}
+          {% set diff = (now() - last_changed).total_seconds() %}
+          {% if diff < 60 %}
+            Zojuist
+          {% elif diff < 3600 %}
+            {{ (diff / 60) | int }} minuten geleden
+          {% elif diff < 86400 %}
+            {{ (diff / 3600) | int }} uur geleden
+          {% else %}
+            {{ (diff / 86400) | int }} dagen geleden
+          {% endif %}
+
+mqtt:
+  sensor:
+    - name: mike_last_changed
+      state_topic: homeassistant/persistence/mike
+      value_template: >
+        {{ value | replace(' ', 'T') }}
+
+    - name: anna_last_changed
+      state_topic: homeassistant/persistence/anna
+      value_template: >
+        {{ value | replace(' ', 'T') }}
+
+automation:
+  - alias: person_home
+    id: "8423590985012"
+    mode: parallel
+    trigger:
+      platform: state
+      entity_id:
+        - person.mike
+        - person.anna
+      from:
+        - home
+        - not_home
+      to:
+        - home
+        - not_home
+    action:
+      action: mqtt.publish
+      data:
+        topic: >
+          homeassistant/persistence/{{ trigger.to_state.name | lower }}
+        payload: >
+          {{ now() }}
+        retain: true

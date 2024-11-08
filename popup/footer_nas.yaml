@@ -1,0 +1,150 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: NAS
+    style: >
+      --popup-max-width: calc(385px + 385px + 385px);
+      --ha-card-border-radius: 0;
+    card_mod:
+      style:
+        layout-card:
+          $grid-layout$:
+            hui-entities-card:
+              $: |
+                .card-content {
+                  padding: var(--tablet-popup-content-padding);
+                  padding-bottom: 0.8em;
+                }
+                ha-card {
+                  border-right: 1.5px solid rgba(0, 0, 0, 0.2);
+                  border-radius: 0;
+                  transition: none;
+                }
+                /* portrait */
+                @media screen and (max-width: 1200px) {
+                  ha-card {
+                    border-right: none;
+                    border-bottom: 1.5px solid rgba(0, 0, 0, 0.2);
+                  }
+                }
+              $hui-horizontal-stack-card:
+                # horizontal bottom buttons
+                $: |
+                  #root {
+                    justify-content: space-evenly;
+                    margin-top: 1.7em;
+                    max-width: 82vw; /* iphonex */
+                  }
+    content:
+      type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        margin: 0
+        grid-template-columns: 385px 385px
+        grid-template-rows: 1fr
+        grid-template-areas: |
+          "nas docker"
+        mediaquery:
+          #portrait
+          "(max-width: 1200px)":
+            grid-template-columns: 1fr
+            grid-template-rows: repeat(2, 1fr)
+            grid-template-areas: |
+              "nas"
+              "docker"
+      cards:
+        ### DOCKER
+        - type: entities
+          view_layout:
+            grid-area: docker
+          title: Docker
+          state_color: true
+          show_header_toggle: false
+          card_mod:
+            class: header
+          entities:
+            - entity: sensor.nas_container_count
+              name: Draaiende containers
+              icon: mdi:docker
+
+            - entity: sensor.nas_container_paused
+              name: Gepauzeerde containers
+              icon: mdi:docker
+
+            - entity: sensor.nas_container_stopped
+              name: Gestopte containers
+              icon: mdi:docker
+
+        ### NAS
+        - type: entities
+          view_layout:
+            grid-area: nas
+          title: NAS
+          show_header_toggle: false
+          card_mod:
+            class: header
+            # no border on last card
+            style: |
+              ha-card {
+                border: none !important;
+              }
+          entities:
+            - entity: sensor.nas_avg_disk_temp
+              icon: mdi:thermometer
+
+            - entity: sensor.nas_uptime
+              name: "Uptime:"
+              icon: mdi:clock
+
+            - type: custom:bar-card
+              width: 55%
+              height: 2em
+              decimal: 0
+              unit_of_measurement: "%"
+              positions: &bar_card_positions
+                icon: outside
+                indicator: "off"
+                name: outside
+              severity: &bar_card_severity
+                - color: "#6d2525"
+                  from: 85
+                  to: 999
+              entity_row: true
+              entities:
+                - entity: sensor.nas_cpu
+                  name: Processor
+                - entity: sensor.nas_ram
+                  name: RAM
+
+            - type: custom:button-card
+              name: Starten
+              icon: mdi:power
+              tap_action:
+                action: call-service
+                service: wake_on_lan.send_magic_packet
+                service_data:
+                  mac: !secret nasmac
+                  broadcast_address: !secret nasbroadcast
+              template: icon_name
+              card_mod:
+                style: |
+                  :host {
+                    float:left;
+                    z-index: 3;
+                  }
+        
+            - type: custom:button-card
+              name: Afsluiten
+              icon: mdi:sleep
+              confirmation:
+                text: Weet je het zeker?
+              tap_action:
+                action: call-service
+                service: shell_command.nas_off
+              template: icon_name
+              card_mod:
+                style: |
+                  :host {
+                    margin-left: 130px;
+                  }

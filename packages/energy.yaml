@@ -1,0 +1,25 @@
+template:
+  - sensor:
+      - name: "Gemiddeld vebruik per dag"
+        #Initiele meterstand was 284 18-10 14:30 was de opleverdag.
+        state: >
+          {% set total_power_kwh = (states('sensor.p1_meter_energy_import') | float(0)) - 284 %}
+          {% set start_date = as_timestamp('2024-10-18 14:30:00') %}
+          {% set days_passed = ((as_timestamp(now()) - start_date) / 86400) | float(1) %}
+          {% set daily_average_wh = (total_power_kwh * 1000) / days_passed %}
+          {{ (daily_average_wh / 24) | round(0) }} 
+
+automation:
+  - alias: Update Moving Average Daily Power Usage
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.p1_meter_energy_import
+    conditions: []
+    actions:
+      - action: homeassistant.update_entity
+        metadata: {}
+        data:
+          entity_id:
+          - sensor.gemiddeld_vebruik_per_dag

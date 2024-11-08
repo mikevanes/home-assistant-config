@@ -1,0 +1,164 @@
+#################################################
+#                                               #
+#                  IMMICH BASE                  #
+#                                               #
+#################################################
+
+base_immich:
+  template:
+    - base
+  tap_action:
+    action: none
+  double_tap_action:
+    action: none
+  styles:
+    card:
+      - color: >
+          [[[
+            '#97989c'
+          ]]]
+      - text-shadow: >
+          [[[
+            '1px 1px 5px rgba(18, 22, 23, 0.9)'
+          ]]]
+
+#################################################
+#                                               #
+#               Immich main                     #
+#                                               #
+#################################################
+
+immich:
+  aspect_ratio: 1000/996
+  template:
+    - base
+  state_display: >
+    [[[
+      let output = "";
+      let elt = this.shadowRoot;
+      setTimeout(marquee, 100);
+      
+      const fullInfo = states['sensor.random_immich_photo_json']?.state;
+      output = fullInfo.split(", LOC: ")[1];
+
+      if (
+        !output || output.toLowerCase() === "null" || output.toLowerCase() === "undefined" ||  output.toLowerCase() === " -  - "
+      ) {
+        return "Onbekend";
+      }
+
+      function marquee() {
+        let state = elt.getElementById("state");
+        let container = elt.getElementById("container");
+
+        if (!state || !container) {
+          console.warn("State or container element not found in the DOM.");
+          return;
+        }
+
+        let ro = new ResizeObserver(entries => {
+          if (entries.length > 1) {
+            let spacer = "&nbsp;".repeat(3),
+                s = entries[0],
+                c = entries[1],
+                r = s && s.contentRect &&
+                    c && c.contentRect &&
+                    s.contentRect.width !== 0 &&
+                    c.contentRect.width !== 0;
+
+            if (r && s.contentRect.width < c.contentRect.width) {
+              state.classList.remove("marquee");
+            } else if (r && s.contentRect.width >= c.contentRect.width) {
+              state.innerHTML = `${output} ${spacer} ${output} ${spacer}&nbsp;`;
+              state.classList.add("marquee");
+            }
+          }
+        });
+
+        ro.observe(state);
+        ro.observe(container);
+      }
+
+      return output;
+    ]]]
+  tap_action: none
+  styles:
+    grid:
+      - gap: 0.65%
+    name:
+      - padding: 0.2vw
+      - margin: -0.2vw
+    state:
+      - padding-bottom: 5.25%
+      - max-width: unset
+      - overflow: visible
+    card:
+      - font-size: 1vw
+      - font-weight: bold
+      - padding: 5.75% 5.25% 0 5.75%
+      - border-radius: calc(var(--button-card-border-radius) / 2)
+      - background: rgba(115, 115, 115, 0.2) center center/cover no-repeat
+      - background-image: >
+          [[[
+            const fullInfo = states['sensor.random_immich_photo_json']?.state;
+            const bgimageloc = 
+              fullInfo.split("Path: ")[1]
+              .split(", LOC: ")[0]
+              .replace("/config/www/", "/local/");
+
+            if (bgimageloc) {
+              return `url("${bgimageloc}")`;
+            }
+          ]]]
+      - color: >
+          [[[
+            return entity === undefined
+                ? '#97989c'
+                : '#efefef';
+          ]]]
+      - text-shadow: >
+          [[[
+            return entity === undefined
+                ? 'none'
+                : '1px 1px 5px rgba(18, 22, 23, 0.9)';
+          ]]]
+    custom_fields:
+      blur_overlay:
+        - display: block
+        - position: absolute
+        - width: 103.1%
+        - height: 103.1%
+        - clip-path: >
+            inset(74.5% 1.45% 1.45% 1.45% round 0 0 calc(var(--button-card-border-radius) / 2) calc(var(--button-card-border-radius) / 2))
+        - backdrop-filter: var(--blur-intensity)
+        - -webkit-backdrop-filter: var(--blur-intensity)
+        - left: -1.5%
+        - bottom: -1.6%
+  custom_fields:
+    blur_overlay: >
+      [[[
+        setTimeout(() => {
+            let elt = this.shadowRoot,
+                card = elt.getElementById('card'),
+                container = elt.getElementById('container'),
+                blur_overlay = elt.getElementById('blur_overlay');
+
+            if (elt && card && container && blur_overlay) {
+                card.insertBefore(blur_overlay, container);
+            }
+          }, 0);
+        return ' ';
+      ]]]
+  extra_styles: |
+    @keyframes marquee-animation {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .marquee {
+      animation: marquee-animation 20s linear infinite;
+    }

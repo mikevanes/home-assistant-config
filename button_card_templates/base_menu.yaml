@@ -1,0 +1,66 @@
+base_menu:
+  styles:
+    card:
+      - border-radius: 32px
+      - border-width: 0
+      - background-color: >
+          [[[
+            return variables.active ? "rgba(255, 255, 255, 0.85)" : "rgb(41, 44, 45)"
+          ]]]
+      - height: 50px
+      - padding: 0
+      - transition: none!important
+    grid:
+      - grid-template-areas: '"n i" "s i" "l i"'
+      - grid-template-columns: 1fr 40%
+    img_cell:
+      - justify-content: flex-end
+    entity_picture:
+      - transition: none!important
+      - width: >
+          [[[
+            return variables.media ? "35px" : "80%"
+          ]]]
+      - height: >
+          [[[
+            return variables.media ? "35px" : "auto"
+          ]]]
+      - filter: >
+          [[[
+            return variables.active ? "saturate(100%) brightness(100%) contrast(100%)" : "saturate(50%) brightness(50%) contrast(50%)" 
+          ]]]
+      - right: >
+          [[[
+            return variables.media ? "0.8em" : "-0.8em"
+          ]]]
+      - border-radius: 50%
+    icon:
+      - color: >
+          [[[
+            return variables.active ? "#205477" : "#808080" 
+          ]]]
+      - width: 40px
+      - right: 0.8em
+    name:
+      - position: absolute
+      - left: 1.3em
+      - color: >
+          [[[
+            return variables.active ? "#4b5254" : "#808080" 
+          ]]]
+      - font-weight: bold
+    state:
+      - position: absolute
+      - left: 2.2em
+      - font-size: 10px
+      - bottom: 0.5em
+      - color: >
+          [[[
+            return variables.active ? "#4b5254" : "#808080" 
+          ]]]
+  card_mod:
+    style: |
+      #aspect-ratio{
+        display:block!important;
+        padding: 0.5em var(--custom-layout-card-padding) 0 var(--custom-layout-card-padding)
+      }

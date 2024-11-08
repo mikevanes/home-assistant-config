@@ -1,0 +1,30 @@
+power_usage:
+  card_mod:
+    style: |
+      ha-card.type-custom-mini-graph-card {
+        padding: 10px 0px 0px;
+        margin: 0px 0px 0px 0px;
+        border: none;
+      }
+      ha-card > div {
+        padding: 0px !important;
+      }
+      .type-custom-mini-graph-card .header {
+        display: none !important; /* This hides the header text */
+      }
+      .type-custom-mini-graph-card .name {
+        display: none !important; /* This hides the main name of the graph */
+      }
+      .type-custom-mini-graph-card .icon {
+        display: none !important; /* This hides the icon if there's one */
+      }
+      .type-custom-mini-graph-card .state {
+        padding: 0px 2.5vw 0 var(--custom-layout-card-padding);
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .type-custom-mini-graph-card .state .state__value,
+      .type-custom-mini-graph-card .state .state__uom {
+        font-family: var(--primary-font-family);
+        line-height: 1em;
+      }

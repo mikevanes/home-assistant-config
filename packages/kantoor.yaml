@@ -1,0 +1,118 @@
+automation:
+  - alias: "Kantoor aan, bij beweging"
+    mode: single
+    triggers:
+      - type: occupied
+        device_id: 668ef345afec87b1f1aec4ddd46187e3
+        entity_id: 5a360ab6b47bd6ab824c3d2f358ebca3
+        domain: binary_sensor
+        trigger: device
+    conditions:
+      - type: is_illuminance
+        condition: device
+        device_id: 668ef345afec87b1f1aec4ddd46187e3
+        entity_id: 89fb1f48db5b3b5330e443c3b19c5124
+        domain: sensor
+        below: 1200
+      - condition: device
+        type: is_off
+        device_id: f9a01f0ec04b3b6cbcc5aefdce7ae76c
+        entity_id: ceab16e01605389230a9da19817409d5
+        domain: light
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.kantoor
+  
+  - alias: "Kantoor aan lamp, donker"
+    mode: single
+    triggers:
+      - type: illuminance
+        device_id: 668ef345afec87b1f1aec4ddd46187e3
+        entity_id: 89fb1f48db5b3b5330e443c3b19c5124
+        domain: sensor
+        trigger: device
+        below: 1200
+    conditions:
+      - condition: or
+        conditions:
+          - condition: not
+            conditions:
+              - condition: device
+                device_id: 9d29e8a29d0e305aaa42131571850594
+                domain: media_player
+                entity_id: a65b8647d257fce5cf20eb79392a1cfa
+                type: is_off
+          - condition: not
+            conditions:
+              - condition: device
+                device_id: 9d29e8a29d0e305aaa42131571850594
+                domain: media_player
+                entity_id: a65b8647d257fce5cf20eb79392a1cfa
+                type: is_idle
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.kantoor
+
+  # - alias: "Kantoor uit, daglicht."
+  #   mode: single
+  #   triggers:
+  #     - type: illuminance
+  #       device_id: 668ef345afec87b1f1aec4ddd46187e3
+  #       entity_id: 89fb1f48db5b3b5330e443c3b19c5124
+  #       domain: sensor
+  #       trigger: device
+  #       above: 1200
+  #   conditions: []
+  #   actions:
+  #     - action: light.turn_off
+  #       target:
+  #         entity_id: light.kantoor
+
+  - alias: "Kantoor uit, geen beweging en monitor uit."
+    mode: single
+    triggers:
+    - trigger: state
+      entity_id:
+        - binary_sensor.motion_kantoor_occupancy
+      to: "off"
+    conditions:
+      - condition: state
+        entity_id: light.kantoor
+        state: "on"
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: media_player.32_odyssey_oled_g8
+            state: "off"
+          - condition: state
+            entity_id: media_player.32_odyssey_oled_g8
+            state: standby
+    actions:
+    - action: light.turn_off
+      target:
+          entity_id: light.kantoor
+
+  - alias: "Kantoor uit, monitor uit en geen beweging."
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id:
+          - media_player.32_odyssey_oled_g8
+        to: "off"
+      - trigger: state
+        entity_id:
+          - media_player.32_odyssey_oled_g8
+        to: idle
+    conditions:
+      - condition: state
+        entity_id: light.kantoor
+        state: "on"
+      - condition: state
+        entity_id: binary_sensor.motion_kantoor_occupancy
+        state: "off"
+    actions:
+      - action: light.turn_off
+        target:
+          entity_id: light.kantoor

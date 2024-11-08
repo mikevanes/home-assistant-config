@@ -1,0 +1,123 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: Batterij statussen
+    style: >
+      --popup-max-width: calc(300px * 4);
+      --ha-card-border-radius: 0;
+    card_mod:
+      style:
+        layout-card:
+          $grid-layout$:
+            hui-entities-card:
+              $: |
+                .card-content {
+                  padding: var(--tablet-popup-content-padding);
+                  padding-bottom: 0.8em;
+                }
+                ha-card {
+                  border-right: 1.5px solid rgba(0, 0, 0, 0.2);
+                  border-radius: 0;
+                  transition: none;
+                }
+                /* portrait */
+                @media screen and (max-width: 1200px) {
+                  ha-card {
+                    border-right: none;
+                    border-bottom: 1.5px solid rgba(0, 0, 0, 0.2);
+                  }
+                }
+              $hui-horizontal-stack-card:
+                # horizontal bottom buttons
+                $: |
+                  #root {
+                    justify-content: space-evenly;
+                    margin-top: 1.7em;
+                    max-width: 82vw; /* Adjust for specific device view */
+                  }
+    content:
+      type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        margin: 0
+        grid-template-columns: repeat(4, 300px)
+        grid-template-rows: 1fr
+        grid-template-areas: |
+          "batt010 batt1020 batt2040 batt40100"
+        mediaquery:
+          #portrait layout adjustment
+          "(max-width: 1200px)":
+            grid-template-columns: 1fr
+            grid-template-rows: repeat(4, 1fr)
+            grid-template-areas: |
+              "batt010"
+              "batt1020"
+              "batt2040"
+              "batt40100"
+      cards:
+        ### 0-10%
+        - type: custom:auto-entities
+          view_layout:
+            grid-area: batt010
+          card:
+            type: entities
+            title: Batterij 0-10%
+          filter:
+            include:
+              - group: sensor.batterij_gevoedde_apparaten
+                state: "< 10"
+          sort:
+            method: state
+            reverse: true  # Sort in descending order for high to low battery
+
+        ### 10-20%
+        - type: custom:auto-entities
+          view_layout:
+            grid-area: batt1020
+          card:
+            type: entities
+            title: Batterij 10-20%
+          filter:
+            include:
+              - group: sensor.batterij_gevoedde_apparaten
+                state: ">= 10"
+            exclude:
+              - state: "> 19"
+          sort:
+            method: state
+            reverse: true
+
+        ### 20-40%
+        - type: custom:auto-entities
+          view_layout:
+            grid-area: batt2040
+          card:
+            type: entities
+            title: Batterij 20-40%
+          filter:
+            include:
+              - group: sensor.batterij_gevoedde_apparaten
+                state: ">= 20"
+            exclude:
+              - state: "> 39"
+          sort:
+            method: state
+            reverse: true
+
+        ### 40-100%
+        - type: custom:auto-entities
+          view_layout:
+            grid-area: batt40100
+          card:
+            type: entities
+            title: Batterij 40-100%
+          filter:
+            include:
+              - group: sensor.batterij_gevoedde_apparaten
+                state: ">= 40"
+            exclude:
+              - state: "> 100"
+          sort:
+            method: state
+            reverse: true

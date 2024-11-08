@@ -1,0 +1,15 @@
+automation:
+  - alias: Daily Backup at 2 AM
+    mode: single
+    triggers:
+      - trigger: time
+        at: "02:00:00"
+    conditions: []
+    actions:
+      - action: auto_backup.backup
+        data:
+          name: Automatic Backup {{ now().strftime('%Y-%m-%d') }}
+          keep_days: 2
+      - action: hassio.addon_restart
+        data:
+            addon: 19a172aa_rclone_backup

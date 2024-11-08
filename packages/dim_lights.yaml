@@ -1,0 +1,124 @@
+automation:
+  - alias: "Dim lights weekdays after 23:00"
+    mode: single
+    triggers:
+      - trigger: time
+        at: "23:00:00"
+    conditions:
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - sun
+    actions:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 5
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+            - 02fffc146db35f9170df1998a6812199
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+            - 02fffc146db35f9170df1998a6812199
+
+  - alias: "Undim lights weekdays after 06:40"
+    mode: single
+    triggers:
+      - trigger: time
+        at: "06:40:00"
+    conditions:
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+    actions:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 70
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 50
+        target:
+          device_id: 02fffc146db35f9170df1998a6812199
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+            - 02fffc146db35f9170df1998a6812199
+
+  - alias: "Dim lights weekends after 24:00"
+    mode: single
+    triggers:
+      - trigger: time
+        at: "00:00:00"
+    conditions:
+      - condition: time
+        weekday:
+          - fri
+          - sat
+    actions:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 5
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+            - 02fffc146db35f9170df1998a6812199
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+            - 02fffc146db35f9170df1998a6812199
+
+  - alias: "Undim lights weekends after 08:00"
+    mode: single
+    triggers:
+      - trigger: time
+        at: "08:00:00"
+    conditions:
+      - condition: time
+        weekday:
+          - sat
+          - sun
+    actions:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 70
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 70
+        target:
+          device_id: 02fffc146db35f9170df1998a6812199
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id:
+            - 2174e320c3d355e2ec34162a89c6a842
+            - 02fffc146db35f9170df1998a6812199

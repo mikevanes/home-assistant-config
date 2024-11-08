@@ -1,0 +1,247 @@
+- alias: Set pc_mike_lock based on session lock state
+  trigger:
+  - platform: state
+    entity_id: sensor.pc_mike_session
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.pc_mike_session
+        state: Unlocked
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.pc_mike_lock
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''sensor.pc_mike_session'', ''Unavailable'')
+          or is_state(''sensor.pc_mike_session'', ''Locked'') }}
+
+          '
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.pc_mike_lock
+  id: 66e5e1bbc8e94369a8886b91a5630cae
+- id: '1727017828258'
+  alias: Set pc_mike_lock and active based on session lock state
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pc_mike_session
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.pc_mike_session
+        state: Unlocked
+      sequence:
+      - target:
+          entity_id: input_boolean.pc_mike_lock
+        action: input_boolean.turn_on
+        data: {}
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''sensor.pc_mike_session'', ''Unavailable'')
+          or is_state(''sensor.pc_mike_session'', ''Locked'') }}
+
+          '
+      sequence:
+      - target:
+          entity_id: input_boolean.pc_mike_lock
+        action: input_boolean.turn_off
+        data: {}
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.pc_mike
+  mode: single
+- id: '1728806979894'
+  alias: Lampen aan, bij bezetting en zonsondergang
+  description: ''
+  triggers:
+  - entity_id: binary_sensor.presence_detector_wc_presence
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.presence_detector_wc_illuminance_lux
+      below: 750
+    - condition: state
+      entity_id: sun.sun
+      state: below_horizon
+  actions:
+  - target:
+      entity_id: light.all_lights
+    action: light.turn_on
+    data: {}
+  mode: single
+- id: '1730031942190'
+  alias: HUE dimmer keuken
+  description: ''
+  use_blueprint:
+    path: CrazyCoder/zigbee2mqtt_hue_dimmer_v2.yaml
+    input:
+      action_sensor: sensor.hue_schakelaar_keuken_action
+      helper_last_controller_event: input_text.hue_dimmer_keuken
+      on_press:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.keuken
+      up_press:
+      - action: light.turn_on
+        target:
+          entity_id: light.keuken
+        data:
+          brightness_step_pct: 10
+      up_hold:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 5
+        target:
+          entity_id: light.keuken
+      down_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id: light.keuken
+      down_hold:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -5
+        target:
+          entity_id: light.keuken
+- id: '1730305912339'
+  alias: Hue dimmer slaapkamer
+  description: ''
+  use_blueprint:
+    path: CrazyCoder/zigbee2mqtt_hue_dimmer_v2.yaml
+    input:
+      action_sensor: sensor.hue_schakelaar_slaapkamer_action
+      helper_last_controller_event: input_text.hue_button_slaapkamer_text_helper
+      on_press:
+      - action: light.toggle
+        target:
+          entity_id:
+          - light.slaapkamer
+        data: {}
+      up_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id: light.slaapkamer
+      up_hold:
+      - action: light.turn_on
+        target:
+          entity_id: light.slaapkamer
+        data:
+          brightness_step_pct: 5
+      down_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id: light.slaapkamer
+      down_hold:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -5
+        target:
+          entity_id: light.slaapkamer
+- id: '1730307935329'
+  alias: HUE dimmer toilet
+  description: ''
+  use_blueprint:
+    path: CrazyCoder/zigbee2mqtt_hue_dimmer_v2.yaml
+    input:
+      action_sensor: sensor.hue_schakelaar_toilet_action
+      helper_last_controller_event: input_text.hue_dimmer_toilet
+      on_press:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.toilet
+      up_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id: light.toilet
+      up_hold:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 5
+        target:
+          entity_id: light.toilet
+      down_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id: light.toilet
+      down_hold:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -5
+        target:
+          entity_id: light.toilet
+- id: '1730312823062'
+  alias: HUE dimmer kantoor
+  description: ''
+  use_blueprint:
+    path: CrazyCoder/zigbee2mqtt_hue_dimmer_v2.yaml
+    input:
+      action_sensor: sensor.hue_schakelaar_kantoor_action
+      helper_last_controller_event: input_text.hue_dimmer_kantoor
+      on_press:
+      - action: light.toggle
+        target:
+          entity_id: light.kantoor
+        data: {}
+      up_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id: light.kantoor
+      up_hold:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 5
+        target:
+          entity_id: light.kantoor
+      down_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id: light.kantoor
+      down_hold:
+      - action: light.turn_on
+        target:
+          entity_id: light.kantoor
+        data:
+          brightness_step_pct: -5

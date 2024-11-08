@@ -1,0 +1,54 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: Mike
+    style: >
+      --popup-max-width: 400px;
+    content:
+      type: vertical-stack
+      cards:
+        - type: entities
+          entities:
+            - type: custom:template-entity-row
+              entity: person.mike # Sensor data komt uit person_persistance.yaml
+              secondary: >
+                {{ states('sensor.mike_update_info') }} | Batterij: {{ states('sensor.mike_battery_level') }}%
+              
+
+        - type: custom:mod-card
+          card_mod:
+            style:
+              hui-horizontal-stack-card$: |
+                #root {
+                  justify-content: space-evenly !important;
+                  padding: var(--tablet-popup-button-padding);
+                }
+          card:
+            type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                name: Zoek iPhone van Mike
+                icon: mdi:volume-high
+                template: icon_name
+                tap_action:
+                  action: call-service
+                  service: icloud.play_sound
+                  service_data:
+                    account: !secret appleaccountemailmike
+                    device_name: mike
+
+        - type: calendar
+          initial_view: dayGridMonth
+          entities:
+            - calendar.main
+            - calendar.mike_anna_icloud
+            - calendar.mela_3
+            - calendar.inbox
+            - calendar.gedeeld
+          card_mod:
+            style:
+              ha-full-calendar$: |
+                .header h1 {
+                  font-size: 1.2em;
+                }

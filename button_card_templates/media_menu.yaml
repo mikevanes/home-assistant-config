@@ -1,0 +1,58 @@
+media_menu:
+  state_display: >
+    [[[
+      // Helper function to get the necessary media attributes
+      const getMediaAttributes = (entity, source) => {
+        const state = hass.states[entity]?.state;
+        const artist = hass.states[entity]?.attributes?.media_artist;
+        const title = hass.states[entity]?.attributes?.media_title;
+        const isOnTv = hass.states[entity]?.attributes?.source === source;
+        return { state, artist, title, isOnTv };
+      };
+
+      // Truncate function for text
+      const truncate = (text, maxLength) => text && text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+
+      // Define sources and priorities
+      const mikeSpotify = getMediaAttributes("media_player.spotify", "[LG] webOS TV OLED55C46LA");
+      const annaSpotify = getMediaAttributes("media_player.spotify_annawilmink", "[LG] webOS TV OLED55C46LA");
+      const plex = hass.states["media_player.plex_plex_for_windows_desktop_vqi6kc7"];
+      const plexState = plex?.state;
+      const plexTitle = plex?.attributes?.media_title;
+
+      // Determine Spotify state to display
+      let stateSpotify = "";
+      if (mikeSpotify.state === "playing" && mikeSpotify.isOnTv) {
+        stateSpotify = truncate(`${mikeSpotify.artist} ${mikeSpotify.title}`, 40);
+      } else if (annaSpotify.state === "playing" && annaSpotify.isOnTv) {
+        stateSpotify = truncate(`${annaSpotify.artist} ${annaSpotify.title}`, 40);
+      }
+
+      // Determine Plex state to display
+      const statePlex = plexState === "playing" && plexTitle ? truncate(plexTitle, 40) : "";
+
+      // Return the appropriate state, preferring Spotify if available
+      return stateSpotify !== "" ? stateSpotify : statePlex;
+    ]]]
+  entity_picture: >
+    [[[
+      // Helper function to get state and image
+      const getStateImage = (entity, source) => {
+        const state = hass.states[entity]?.state;
+        const bgImage = hass.states[entity]?.attributes?.entity_picture;
+        const isOnTv = hass.states[entity]?.attributes?.source === source;
+        return { state, bgImage, isOnTv };
+      };
+
+      // Define sources and priorities
+      const mikeSpotify = getStateImage("media_player.spotify", "[LG] webOS TV OLED55C46LA");
+      const annaSpotify = getStateImage("media_player.spotify_annawilmink", "[LG] webOS TV OLED55C46LA");
+      const plex = getStateImage("media_player.plex_plex_for_windows_desktop_vqi6kc7");
+
+      // Determine background image based on priority
+      if (mikeSpotify.state === "playing" && mikeSpotify.isOnTv) return mikeSpotify.bgImage;
+      if (annaSpotify.state === "playing" && annaSpotify.isOnTv) return annaSpotify.bgImage;
+      if (plex.state === "playing") return plex.bgImage;
+
+      return "";
+    ]]]
