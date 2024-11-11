@@ -15,7 +15,7 @@ media_menu:
 
       // Define sources and priorities
       const mikeSpotify = getMediaAttributes("media_player.spotify", "[LG] webOS TV OLED55C46LA");
-      const annaSpotify = getMediaAttributes("media_player.spotify_annawilmink", "[LG] webOS TV OLED55C46LA");
+      const annaSpotify = getMediaAttributes("media_player.spotify_anna", "[LG] webOS TV OLED55C46LA");
       const plex = hass.states["media_player.plex_plex_for_windows_desktop_vqi6kc7"];
       const plexState = plex?.state;
       const plexTitle = plex?.attributes?.media_title;
@@ -46,7 +46,7 @@ media_menu:
 
       // Define sources and priorities
       const mikeSpotify = getStateImage("media_player.spotify", "[LG] webOS TV OLED55C46LA");
-      const annaSpotify = getStateImage("media_player.spotify_annawilmink", "[LG] webOS TV OLED55C46LA");
+      const annaSpotify = getStateImage("media_player.spotify_anna", "[LG] webOS TV OLED55C46LA");
       const plex = getStateImage("media_player.plex_plex_for_windows_desktop_vqi6kc7");
 
       // Determine background image based on priority

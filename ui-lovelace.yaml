@@ -101,7 +101,7 @@ views:
             show_entity_picture: true
             triggers_update:
               - media_player.spotify
-              - media_player.spotify_annawilmink
+              - media_player.spotify_anna
               - media_player.plex_plex_for_windows_desktop_vqi6kc7
             template:
               - base_menu
@@ -803,7 +803,7 @@ views:
           - entity: input_text.active_spotify_player
             state_not: "media_player.spotify"
           - entity: input_text.active_spotify_player
-            state_not: "media_player.spotify_annawilmink"
+            state_not: "media_player.spotify_anna"
           - entity: sensor.nas_status
             state: "false"
         card:
@@ -828,7 +828,7 @@ views:
           - entity: input_text.active_spotify_player
             state_not: "media_player.spotify"
           - entity: input_text.active_spotify_player
-            state_not: "media_player.spotify_annawilmink"
+            state_not: "media_player.spotify_anna"
           - entity: sensor.nas_status
             state: "true"
         card:
@@ -1014,14 +1014,14 @@ views:
       - type: conditional
         conditions:
           - entity: input_text.active_spotify_player
-            state: "media_player.spotify_annawilmink"
+            state: "media_player.spotify_anna"
         card:
           type: grid
           columns: 2
           cards:
             # Spoty Player (Mini Media Player)
             - type: "custom:mini-media-player"
-              entity: media_player.spotify_annawilmink
+              entity: media_player.spotify_anna
               artwork: full-cover
               volume_step: 5
               hide:
